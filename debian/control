@@ -3,13 +3,13 @@ Section: misc
 Priority: optional
 Maintainer: Sebastien Delafond <seb@debian.org>
 Build-Depends: debhelper (>= 6)
-Build-Depends-Indep: texinfo, texlive-latex-base, emacs | emacs24 | emacs23
-Standards-Version: 3.9.3
+Build-Depends-Indep: emacs | emacs24 | emacs23 | emacs-snapshot
+Standards-Version: 3.9.4
 Homepage: http://orgmode.org
 
 Package: org-mode
 Architecture: all
-Depends: ${misc:Depends}, emacs24 | emacs23
+Depends: ${misc:Depends}, emacs24 | emacs23 | emacs-snapshot
 Suggests: remember-el, easypg, ditaa
 Description: keep notes, maintain ToDo lists, and do project planning in emacs
  Org-mode is a mode for keeping notes, maintaining ToDo lists, and

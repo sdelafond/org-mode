@@ -58,35 +58,5 @@ Copyright:
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
    02110-1301, USA.
 
-   org-mode's documentation:
-   =========================
-
-   orgcard.tex
-   -----------
-
-    % Copyright (C) 1987, 1993, 1996, 1997, 2001, 2002, 2003, 2004, 2005,
-    %   2006, 2007, 2008, 2009  Free Software Foundation, Inc.
-
-    % This file is part of GNU Emacs.
-
-    % GNU Emacs is free software: you can redistribute it and/or modify
-    % it under the terms of the GNU General Public License as published by
-    % the Free Software Foundation, either version 3 of the License, or
-    % (at your option) any later version.
-
-   
-   The Org Manual
-   --------------
-
-   Debian exercises the following copyright license grant from the
-   file ‘org_dual_license.texi’ in the source:
-
-    Copyright © 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation
-
-    Permission is also granted to copy, distribute and/or modify this document
-    under the terms of the GNU General Public License (GPL).
-    You should have received a copy of the GNU General Public License
-    along with GNU Emacs.  If not, see http://www.gnu.org/licenses/.
-
 On Debian systems, the complete text of version 3 of the GNU General
 Public License can be found in ‘/usr/share/common-licenses/GPL-3’.

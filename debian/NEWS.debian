@@ -1,0 +1,7 @@
+org-mode (8.0.6-1) unstable; urgency=low
+
+    To fix Debian bug #709494, and keep org-mode in the main section, the
+    documentation has been removed from this package and moved to
+    org-mode-doc, to be found soon in the non-free section.
+
+ -- Sebastien Delafond <seb@debian.org>  Mon, 15 Jul 2013 13:51:17 +0200

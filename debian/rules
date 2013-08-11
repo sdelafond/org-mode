@@ -23,7 +23,7 @@ install: build
 	cp -r etc $(CURDIR)/debian/org-mode/usr/share/emacs/site-lisp/org-mode
 #	cp xemacs/*.el $(CURDIR)/debian/org-mode/usr/share/xemacs/site-lisp/org-mode
 	cp -r contrib $(CURDIR)/debian/org-mode/usr/share/org-mode/
-	make doc
+#	make doc
 	rm -f $(DOC_TMP_FILES)
 	find $(CURDIR)/debian/org-mode/usr/share/org-mode/ -type f -exec chmod 644 "{}" \;
 	find $(CURDIR)/debian/org-mode/usr/share/emacs/site-lisp/org-mode -type f -exec chmod 644 "{}" \;
@@ -34,11 +34,11 @@ binary-indep: install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs
-	dh_installdocs doc/*
+	dh_installdocs
 	rm -f $(CURDIR)/debian/org-mode/usr/share/doc/org-mode/*texi*
 	dh_installemacsen -v
 	dh_fixperms
-	dh_installinfo doc/org
+#	dh_installinfo doc/org
 	dh_compress
 	dh_installdeb
 	dh_gencontrol

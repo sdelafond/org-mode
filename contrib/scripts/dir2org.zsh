@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # desc:
 #
 # Output an org compatible structure representing the filesystem from

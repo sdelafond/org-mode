@@ -1,9 +1,3 @@
-org-mode (8.0.7-2~bpo70+1) wheezy-backports; urgency=low
-
-  * Backport for wheezy
-
- -- Sebastien Delafond <seb@debian.org>  Tue, 10 Sep 2013 22:38:52 +0200
-
 org-mode (8.0.7-2) unstable; urgency=low
 
   * Do not Recommend remember-el anymore, as it's obsolete with Org 8.x

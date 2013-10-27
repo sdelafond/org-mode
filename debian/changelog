@@ -1,3 +1,12 @@
+org-mode (8.2.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Do not support emacs22 anymore (Closes: #719037)
+  * Recommend texlive-generic-recommended and texlive-latex-recommended
+    (Closes: #725126)
+
+ -- Sebastien Delafond <seb@debian.org>  Sun, 27 Oct 2013 17:14:14 +0100
+
 org-mode (8.0.7-2) unstable; urgency=low
 
   * Do not Recommend remember-el anymore, as it's obsolete with Org 8.x

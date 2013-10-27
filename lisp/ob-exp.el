@@ -122,11 +122,11 @@ Assume point is at the beginning of block's starting line."
 	  (org-babel-exp-in-export-file lang
 	    (setf (nth 2 info)
 		  (org-babel-process-params
-		   (org-babel-merge-params
-		    org-babel-default-header-args
-		    (org-babel-params-from-properties lang)
-		    (if (boundp lang-headers) (eval lang-headers) nil)
-		    raw-params))))
+		   (apply #'org-babel-merge-params
+			  org-babel-default-header-args
+			  (if (boundp lang-headers) (eval lang-headers) nil)
+			  (append (org-babel-params-from-properties lang)
+				  (list raw-params))))))
 	  (setf hash (org-babel-sha1-hash info)))
 	(org-babel-exp-do-export info 'block hash)))))
 
@@ -206,17 +206,20 @@ this template."
 			  (results
 			   (org-babel-exp-do-export
 			    (list "emacs-lisp" "results"
-				  (org-babel-merge-params
-				   org-babel-default-header-args
-				   org-babel-default-lob-header-args
-				   (org-babel-params-from-properties)
-				   (org-babel-parse-header-arguments
-				    (org-no-properties
-				     (concat ":var results="
-					     (mapconcat 'identity
-							(butlast lob-info)
-							" ")))))
-				  "" nil (car (last lob-info)))
+				  (apply #'org-babel-merge-params
+					 org-babel-default-header-args
+					 org-babel-default-lob-header-args
+					 (append
+					  (org-babel-params-from-properties)
+					  (list
+					   (org-babel-parse-header-arguments
+					    (org-no-properties
+					     (concat
+					      ":var results="
+					      (mapconcat 'identity
+							 (butlast lob-info 2)
+							 " ")))))))
+				  "" (nth 3 lob-info) (nth 2 lob-info))
 			    'lob))
 			  (rep (org-fill-template
 				org-babel-exp-call-line-template
@@ -387,7 +390,8 @@ inhibit insertion of results into the buffer."
 		    (org-babel-expand-noweb-references
 		     info (org-babel-exp-get-export-buffer))
 		  (nth 1 info)))
-	  (info (copy-sequence info)))
+	  (info (copy-sequence info))
+	  (org-babel-current-src-block-location (point-marker)))
       ;; skip code blocks which we can't evaluate
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)

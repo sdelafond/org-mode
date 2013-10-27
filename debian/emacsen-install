@@ -13,6 +13,7 @@ LOG=$(tempfile -pelc_ -s.log -m644)
 case ${FLAVOR} in
   emacs) exit 0 ;; # generic emacs package
   emacs21) exit 0 ;; # not supported anymore as of 6.26a-3
+  emacs22) exit 0 ;; # not supported anymore as of 8.x
   xemacs*) exit 0 ;; # not supported anymore as of 7.x
 esac
 

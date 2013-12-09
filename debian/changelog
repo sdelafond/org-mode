@@ -1,3 +1,10 @@
+org-mode (8.2.1-2) unstable; urgency=low
+
+  * Hrm, really recommend texlive-generic-recommended and
+    texlive-latex-recommended (Closes: #725126)
+
+ -- Sebastien Delafond <seb@debian.org>  Mon, 09 Dec 2013 11:46:24 +0100
+
 org-mode (8.2.1-1) unstable; urgency=low
 
   * New upstream release

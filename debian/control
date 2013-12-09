@@ -10,6 +10,7 @@ Homepage: http://orgmode.org
 Package: org-mode
 Architecture: all
 Depends: ${misc:Depends}, emacs24 | emacs23 | emacs-snapshot
+Recommends: texlive-generic-recommended, texlive-latex-recommended
 Suggests: easypg, ditaa
 Description: keep notes, maintain ToDo lists, and do project planning in emacs
  Org-mode is a mode for keeping notes, maintaining ToDo lists, and

@@ -10,7 +10,7 @@ Homepage: http://orgmode.org
 Package: org-mode
 Architecture: all
 Depends: ${misc:Depends}, emacs24 | emacs23 | emacs-snapshot
-Conflicts: emacsen-common (< 2.0.0)
+Conflicts: emacsen-common (<< 2.0.0)
 Recommends: texlive-generic-recommended, texlive-latex-recommended
 Suggests: easypg, ditaa
 Description: keep notes, maintain ToDo lists, and do project planning in emacs

@@ -21,5 +21,5 @@
   (when (file-directory-p package-dir)
     (debian-pkg-add-load-path-item package-dir)
     (require 'org-install)
-    (add-to-list 'auto-mode-alist '("\\.org\\(-mode\\)?$" . org-mode))
+    (add-to-list 'auto-mode-alist '("\\.org\\(-mode\\)?\\'" . org-mode))
     (setq org-ditaa-jar-path "/usr/bin/ditaa")))

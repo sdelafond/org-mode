@@ -1,3 +1,8 @@
+Please note that you need to install texlive-latex-extra (listed in
+Suggests) so you can preview LaTeX equations.
+
+ -- Sebastien Delafond <seb@debian.org>, Wed,  2 Apr 2014 13:08:11 +0200
+
 To enable contributed extensions to org-mode, simply add
 "/usr/share/org-mode/lisp" to your load-path, for instance in your
 .emacs with:

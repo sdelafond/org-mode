@@ -1,6 +1,6 @@
 ;;; ox-latex.el --- LaTeX Back-End for Org Export Engine
 
-;; Copyright (C) 2011-2013  Free Software Foundation, Inc.
+;; Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -1374,7 +1374,13 @@ holding contextual information."
 		  (when (org-export-first-sibling-p headline info)
 		    (format "\\begin{%s}\n" (if numberedp 'enumerate 'itemize)))
 		  ;; Itemize headline
-		  "\\item " full-text "\n" headline-label pre-blanks contents)))
+		  "\\item"
+		  (and full-text (org-string-match-p "\\`[ \t]*\\[" full-text)
+		       "\\relax")
+		  " " full-text "\n"
+		  headline-label
+		  pre-blanks
+		  contents)))
 	    ;; If headline is not the last sibling simply return
 	    ;; LOW-LEVEL-BODY.  Otherwise, also close the list, before
 	    ;; any blank line.
@@ -1564,7 +1570,25 @@ contextual information."
 		(and tag (format "[{%s}] "
 				 (concat checkbox
 					 (org-export-data tag info)))))))
-    (concat counter "\\item" (or tag (concat " " checkbox))
+    (concat counter
+	    "\\item"
+	    (cond
+	     (tag)
+	     (checkbox (concat " " checkbox))
+	     ;; Without a tag or a check-box, if CONTENTS starts with
+	     ;; an opening square bracket, add "\relax" to "\item",
+	     ;; unless the brackets comes from an initial export
+	     ;; snippet (i.e. it is inserted willingly by the user).
+	     ((and contents
+		   (org-string-match-p "\\`[ \t]*\\[" contents)
+		   (not (let ((e (car (org-element-contents item))))
+			  (and (eq (org-element-type e) 'paragraph)
+			       (let ((o (car (org-element-contents e))))
+				 (and (eq (org-element-type o) 'export-snippet)
+				      (eq (org-export-snippet-backend o)
+					  'latex)))))))
+	      "\\relax ")
+	     (t " "))
 	    (and contents (org-trim contents))
 	    ;; If there are footnotes references in tag, be sure to
 	    ;; add their definition at the end of the item.  This
@@ -1853,18 +1877,13 @@ contextual information."
 	 (latex-type (let ((env (plist-get attr :environment)))
 		       (cond (env (format "%s" env))
 			     ((eq type 'ordered) "enumerate")
-			     ((eq type 'unordered) "itemize")
-			     ((eq type 'descriptive) "description")))))
+			     ((eq type 'descriptive) "description")
+			     (t "itemize")))))
     (org-latex--wrap-label
      plain-list
      (format "\\begin{%s}%s\n%s\\end{%s}"
 	     latex-type
-	     ;; Put optional arguments, if any inside square brackets
-	     ;; when necessary.
-	     (let ((options (format "%s" (or (plist-get attr :options) ""))))
-	       (cond ((equal options "") "")
-		     ((string-match "\\`\\[.*\\]\\'" options) options)
-		     (t (format "[%s]" options))))
+	     (or (plist-get attr :options) "")
 	     contents
 	     latex-type))))
 

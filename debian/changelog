@@ -1,3 +1,11 @@
+org-mode (8.2.5h-1) unstable; urgency=low
+
+  * New upstream release
+  * Add a Suggests:texlive-latex-extra (Closes: #740867)
+  * Bump Standards-Version
+
+ -- Sebastien Delafond <seb@debian.org>  Wed, 02 Apr 2014 13:03:49 +0200
+
 org-mode (8.2.4-1) unstable; urgency=low
 
   * New upstream release (Closes: #729725)

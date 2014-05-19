@@ -1,3 +1,9 @@
+org-mode (8.2.5h-2) unstable; urgency=low
+
+  * Bring back dependency on emacsen-common
+
+ -- Sebastien Delafond <seb@debian.org>  Mon, 19 May 2014 22:47:22 +0200
+
 org-mode (8.2.5h-1) unstable; urgency=low
 
   * New upstream release

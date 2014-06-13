@@ -1,3 +1,10 @@
+org-mode (8.2.6-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #644238)
+  * Depend on emacsen-common >= 2.0.8, and add debian/emacsen-compat
+
+ -- Sebastien Delafond <seb@debian.org>  Fri, 13 Jun 2014 13:20:31 +0200
+
 org-mode (8.2.5h-2) unstable; urgency=low
 
   * Bring back dependency on emacsen-common

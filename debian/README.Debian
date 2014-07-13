@@ -1,0 +1,7 @@
+To enable contributed extensions to org-mode, simply add
+"/usr/share/org-mode/lisp" to your load-path, for instance in your
+.emacs with:
+
+  (setq load-path (cons "/usr/share/org-mode/lisp" load-path))
+
+ -- Sebastien Delafond <seb@debian.org>, Thu,  1 Oct 2009 11:11:26 +0200

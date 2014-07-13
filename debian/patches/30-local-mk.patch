@@ -1,8 +1,0 @@
-Description: Generate all the doc. including the refcard
-Forwarded: not-needed
-Author: Sebastien Delafond <seb@debian.org>
-
---- /dev/null
-+++ b/local.mk
-@@ -0,0 +1 @@
-+ORG_MAKE_DOC = info html pdf card

@@ -159,7 +159,7 @@ state to switch it to."
 This is the string shown in the mode line when a clock is running.
 The function is called with point at the beginning of the headline."
   :group 'org-clock
-  :type 'function)
+  :type '(choice (const nil) (function)))
 
 (defcustom org-clock-string-limit 0
   "Maximum length of clock strings in the mode line.  0 means no limit."
@@ -263,6 +263,7 @@ The function or program will be called with the notification
 string as argument."
   :group 'org-clock
   :type '(choice
+	  (const nil)
 	  (string :tag "Program")
 	  (function :tag "Function")))
 
@@ -361,13 +362,13 @@ play with them."
   "Format string for the total time cells."
   :group 'org-clock
   :version "24.1"
-  :type 'boolean)
+  :type 'string)
 
 (defcustom org-clock-file-time-cell-format "*%s*"
   "Format string for the file time cells."
   :group 'org-clock
   :version "24.1"
-  :type 'boolean)
+  :type 'string)
 
 (defcustom org-clock-clocked-in-display 'mode-line
   "When clocked in for a task, org-mode can display the current
@@ -1667,6 +1668,12 @@ Optional argument N tells to change by that many units."
   (message "Clock canceled")
   (run-hooks 'org-clock-cancel-hook))
 
+(defcustom org-clock-goto-before-context 2
+  "Number of lines of context to display before currently clocked-in entry.
+This applies when using `org-clock-goto'."
+  :group 'org-clock
+  :type 'integer)
+
 ;;;###autoload
 (defun org-clock-goto (&optional select)
   "Go to the currently clocked-in entry, or to the most recently clocked one.
@@ -1690,7 +1697,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
     (org-show-entry)
     (org-back-to-heading t)
     (org-cycle-hide-drawers 'children)
-    (recenter)
+    (recenter org-clock-goto-before-context)
     (org-reveal)
     (if recent
 	(message "No running clock, this is the most recently clocked task"))

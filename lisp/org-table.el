@@ -436,15 +436,11 @@ available parameters."
 					   "[ \t]*|[ \t]*")))))))
 
 (defvar org-table-clean-did-remove-column nil) ; dynamically scoped
-(defun org-table-clean-before-export (lines &optional maybe-quoted)
+(defun org-table-clean-before-export (lines)
   "Check if the table has a marking column.
 If yes remove the column and the special lines."
-  (let ((special (if maybe-quoted
-		     "^[ \t]*| *\\\\?[\#!$*_^/ ] *|"
-		   "^[ \t]*| *[\#!$*_^/ ] *|"))
-	(ignore  (if maybe-quoted
-		     "^[ \t]*| *\\\\?[!$_^/] *|"
-		   "^[ \t]*| *[!$_^/] *|")))
+  (let ((special "^[ \t]*| *[#!$*_^/] *|")
+	(ignore "^[ \t]*| *[!$_^/] *|"))
     (setq org-table-clean-did-remove-column
 	  (not (memq nil
 		     (mapcar
@@ -3863,10 +3859,10 @@ With prefix ARG, apply the new formulas to the table."
 	(push org-table-current-begin-pos org-show-positions)
 	(let ((min (apply 'min org-show-positions))
 	      (max (apply 'max org-show-positions)))
-	  (set-window-start (selected-window) (point-min))
+	  (set-window-start (selected-window) min)
 	  (goto-char max)
 	  (or (pos-visible-in-window-p max)
-	      (set-window-start (selected-window) (point-max)))))
+	      (set-window-start (selected-window) max))))
       (select-window win))))
 
 (defun org-table-force-dataline ()

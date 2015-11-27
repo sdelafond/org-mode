@@ -1,3 +1,9 @@
+org-mode (8.3.2-1) unstable; urgency=medium
+
+  * New upstream version 8.3.2
+
+ -- Sebastien Delafond <seb@debian.org>  Fri, 27 Nov 2015 17:40:59 +0100
+
 org-mode (8.3.1-2) unstable; urgency=medium
 
   * easypg is not in the archive anymore (Closes: #798831)

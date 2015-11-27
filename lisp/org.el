@@ -6380,7 +6380,6 @@ needs to be inserted at a specific position in the font-lock sequence.")
 			     ":\\).*$")
 		     '(1 'org-tag-group prepend)))
 	   ;; Special keywords
-	   (list (concat "\\<" org-comment-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-deadline-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-scheduled-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-closed-string) '(0 'org-special-keyword t))
@@ -23847,20 +23846,9 @@ it has a `diary' type."
 		    (org-timestamp-format timestamp fmt t))
 	  (org-timestamp-format timestamp fmt (eq boundary 'end)))))))
 
-Return timestamp as-is if `org-display-custom-times' is nil or if
-it has a `diary' type."
-  (let ((type (org-element-property :type timestamp)))
-    (if (or (not org-display-custom-times) (eq type 'diary))
-	(org-element-interpret-data timestamp)
-      (let ((fmt (funcall (if (org-timestamp-has-time-p timestamp) #'cdr #'car)
-			  org-time-stamp-custom-formats)))
-	(if (and (not boundary) (memq type '(active-range inactive-range)))
-	    (concat (org-timestamp-format timestamp fmt)
-		    "--"
-		    (org-timestamp-format timestamp fmt t))
-	  (org-timestamp-format timestamp fmt (eq boundary 'end)))))))
 
 
+;;; Other stuff.
 
 (defvar reftex-docstruct-symbol)
 (defvar reftex-cite-format)

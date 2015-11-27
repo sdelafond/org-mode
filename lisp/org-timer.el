@@ -498,38 +498,6 @@ time is up."
 	(buffer-name (buffer-base-buffer))))
    (t (error "Not in an Org buffer"))))
 
-(defun org-timer--run-countdown-timer (secs title)
-  "Start countdown timer that will last SECS.
-TITLE will be appended to the notification message displayed when
-time is up."
-  (let ((msg (format "%s: time out" title)))
-    (run-with-timer
-     secs nil `(lambda ()
-		 (setq org-timer-countdown-timer nil
-		       org-timer-start-time nil)
-		 (org-notify ,msg ,org-clock-sound)
-		 (org-timer-set-mode-line 'off)
-		 (run-hooks 'org-timer-done-hook)))))
-
-(defun org-timer--get-timer-title ()
-  "Construct timer title from heading or file name of Org buffer."
-  (cond
-   ((derived-mode-p 'org-agenda-mode)
-    (let* ((marker (or (get-text-property (point) 'org-marker)
-		       (org-agenda-error)))
-	   (hdmarker (or (get-text-property (point) 'org-hd-marker)
-			 marker)))
-      (with-current-buffer (marker-buffer marker)
-	(org-with-wide-buffer
-	 (goto-char hdmarker)
-	 (org-show-entry)
-	 (or (ignore-errors (org-get-heading))
-	     (buffer-name (buffer-base-buffer)))))))
-   ((derived-mode-p 'org-mode)
-    (or (ignore-errors (org-get-heading))
-	(buffer-name (buffer-base-buffer))))
-   (t (error "Not in an Org buffer"))))
-
 (provide 'org-timer)
 
 ;; Local variables:

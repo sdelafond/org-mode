@@ -8630,7 +8630,6 @@ displayed Org file fills the frame."
       (when delete-other-windows (delete-other-windows))
       (widen)
       (goto-char pos)
-      (org-back-to-heading t)
       (when (derived-mode-p 'org-mode)
 	(org-show-context 'agenda)
 	(run-hooks 'org-agenda-after-show-hook)))))

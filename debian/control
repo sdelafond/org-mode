@@ -11,7 +11,7 @@ Vcs-Browser: http://anonscm.debian.org/git/collab-maint/org-mode.git
 
 Package: org-mode
 Architecture: all
-Depends: ${misc:Depends}, emacsen-common (>= 2.0.8), emacs24 | emacs23 | emacs-snapshot
+Depends: ${misc:Depends}, emacsen-common (>= 2.0.8), emacs24 | emacs-snapshot
 Conflicts: emacsen-common (<< 2.0.0)
 Recommends: texlive-generic-recommended, texlive-latex-recommended
 Suggests: ditaa, texlive-latex-extra, texlive-fonts-recommended

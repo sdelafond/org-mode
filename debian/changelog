@@ -1,3 +1,9 @@
+org-mode (8.3.3-2) unstable; urgency=medium
+
+  * Remove support for 8.3 (Closes: #815093)
+
+ -- Sebastien Delafond <seb@debian.org>  Thu, 18 Feb 2016 18:23:58 +0100
+
 org-mode (8.3.3-1) unstable; urgency=medium
 
   * Imported new upstream version 8.3.3

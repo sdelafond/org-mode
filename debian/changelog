@@ -1,3 +1,9 @@
+org-mode (8.3.3-4) unstable; urgency=medium
+
+  * Suggest org-mode-doc (Closes: #816550)
+
+ -- Sebastien Delafond <seb@debian.org>  Thu, 03 Mar 2016 09:29:56 +0100
+
 org-mode (8.3.3-3) unstable; urgency=medium
 
   * Remove support for emacs23 (Closes: #815093) 

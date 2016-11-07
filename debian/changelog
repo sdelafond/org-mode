@@ -1,3 +1,9 @@
+org-mode (9.0-1) unstable; urgency=medium
+
+  * Imported Upstream version 9.0 (Closes: #843029)
+
+ -- Sebastien Delafond <seb@debian.org>  Mon, 07 Nov 2016 10:42:00 +0100
+
 org-mode (8.3.4-1) unstable; urgency=medium
 
   * Imported Upstream version 8.3.4 (Closes: #818305)

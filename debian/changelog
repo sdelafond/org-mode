@@ -1,3 +1,10 @@
+org-mode (9.0-2) unstable; urgency=medium
+
+  * Add alternate dependency on emacs25 (Closes: #847092)
+  * Remove alternate dependency on emacs23
+
+ -- Sebastien Delafond <seb@debian.org>  Mon, 05 Dec 2016 15:44:32 +0100
+
 org-mode (9.0-1) unstable; urgency=medium
 
   * Imported Upstream version 9.0 (Closes: #843029)

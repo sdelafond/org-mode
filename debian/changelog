@@ -1,3 +1,13 @@
+org-mode (9.0.2-1) unstable; urgency=medium
+
+  * Imported Upstream version 9.0.2
+  * Switch to HTTPS for Vcs-*
+  * Bump debhelper compatibility level to 9
+  * Bump up Standards-Version
+  * Use dh_prep instead of dh_clean -k
+
+ -- Sebastien Delafond <seb@debian.org>  Sun, 18 Dec 2016 18:15:55 +0100
+
 org-mode (9.0-3) unstable; urgency=medium
 
   * Binary-Depend on emacs25 also (Closes: #847092)

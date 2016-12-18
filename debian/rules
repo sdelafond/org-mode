@@ -17,7 +17,7 @@ build build-indep build-arch:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_prep
 	dh_installdirs
 	cp lisp/* $(CURDIR)/debian/org-mode/usr/share/emacs/site-lisp/org-mode
 	cp -r etc $(CURDIR)/debian/org-mode/usr/share/emacs/site-lisp/org-mode

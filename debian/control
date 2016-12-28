@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 6)
 Build-Depends-Indep: emacs | emacs25 | emacs24 | emacs-snapshot
 Standards-Version: 3.9.8
 Homepage: http://orgmode.org
-Vcs-Git: https://anonscm.debian.org/collab-maint/org-mode.git
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/org-mode.git
 Vcs-Browser: https://anonscm.debian.org/git/collab-maint/org-mode.git
 
 Package: org-mode

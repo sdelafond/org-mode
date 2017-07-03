@@ -1,62 +1,72 @@
-This package was debianized by Sebastien Delafond <seb@debian.org> on
-Mon, 12 May 2008 16:57:37 -0700
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: http://orgmode.org/
+Upstream-Contact: Carsten Dominik <carsten@orgmode.org>
+Files-Excluded: doc contrib/orgmanual.org contrib/scripts/ditaa.jar
 
-It was downloaded from http://orgmode.org
+Files: *
+Copyright: 2004-2017 Free Software Foundation, Inc.
+License: GPL-3+
 
-Upstream author: Carsten Dominik <carsten@orgmode.org>
+Files: contrib/lisp/org-annotate-file.el
+Copyright: 2008-2014 Philip Jackson <phil@shellarchive.co.uk>
+License: GPL-2+
 
-Copyright:
+Files: contrib/lisp/org-link-edit.el
+Copyright: 2015-2017 Kyle Meyer <kyle@kyleam.com>
+License: GPL-3+
 
-   org-mode:
-   =========
-   org-mode is Copyright (C) 2004, 2005, 2006, 2007, 2008 Free
-   Software Foundation, Inc.
+Files: contrib/lisp/org-registry.el
+Copyright: 2007-2014 Bastien Guerry <bzg@gnu.org>
+License: GPL-3+
 
-   This package is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; version 2 dated June, 1991.
+Files: contrib/lisp/org-mairix.el
+Copyright: 2007-2014 Georg C. F. Greve <greve@fsfeurope.org>
+License: GPL-3+
 
-   This package is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+Files: contrib/lisp/org-screen.el
+Copyright: 2008-2014 Andrew Hyatt <ahyatt@gmail.com>
+License: GPL-3+
 
-   You should have received a copy of the GNU General Public License
-   along with this package; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-   02110-1301, USA.
+Files: contrib/scripts/org2hpda
+Copyright: 2007-2013 Christian Egli <christian.egli@alumni.ethz.ch>
+License: GPL-3+
 
-   contributions:
-   ==============
-   org-annotate.el is Copyright (C) 2008 Philip Jackson
+Files: debian/*
+Copyright: 2008-2017 Sebastien Delafond <seb@debian.org>
+           2017 Nicholas D Steeves <nsteeves@gmail.com>
+License: GPL-3+
 
-   lisp/org-elisp-symbol.el, lisp/org-toc.el, lisp/org2rem.el and
-   lisp/org-registry.el are Copyright 2007 Bastien Guerry
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 3 can be found in `/usr/share/common-licenses/GPL-3'
 
-   lisp/org-mairix.el is Copyright (C) 2007 Georg C. F. Greve
-
-   lisp/org-screen.el is Copyright (c) 2008 Andrew Hyatt
-
-   packages/org-export-freemind-0.1.0/org-export-freemind.el is
-   Copyright (C) 2007 Marco Vezzoli
-
-   scripts/org2hpda is Copyright (C) 2007 Christian Egli
-
-   All the contributions are licensed under the GPL:
-
-   This package is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; version 2 dated June, 1991.
-
-   This package is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this package; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-   02110-1301, USA.
-
-On Debian systems, the complete text of version 3 of the GNU General
-Public License can be found in ‘/usr/share/common-licenses/GPL-3’.
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in `/usr/share/common-licenses/GPL-2'

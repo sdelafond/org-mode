@@ -1,6 +1,6 @@
 ;;; ox.el --- Export Framework for Org Mode          -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2012-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -77,12 +77,12 @@
 (require 'org-macro)
 (require 'tabulated-list)
 
+(declare-function org-src-coderef-format "org-src" (&optional element))
+(declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 (declare-function org-publish "ox-publish" (project &optional force async))
 (declare-function org-publish-all "ox-publish" (&optional force async))
 (declare-function org-publish-current-file "ox-publish" (&optional force async))
 (declare-function org-publish-current-project "ox-publish" (&optional force async))
-(declare-function org-src-coderef-format "org-src" (&optional element))
-(declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 
 (defvar org-publish-project-alist)
 (defvar org-table-number-fraction)
@@ -375,7 +375,7 @@ see.
 This option can also be set with the OPTIONS keyword, e.g.,
 \"creator:t\"."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'boolean
   :safe #'booleanp)
@@ -790,7 +790,7 @@ e.g. \"tasks:nil\"."
 This option can also be set with the OPTIONS keyword,
 e.g. \"title:nil\"."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'boolean
   :safe #'booleanp)
@@ -856,7 +856,7 @@ where PATH is the un-resolvable reference.
 This option can also be set with the OPTIONS keyword, e.g.,
 \"broken-links:mark\"."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type '(choice
 	  (const :tag "Ignore broken links" t)
@@ -894,7 +894,7 @@ HTML code while every other back-end will ignore it."
   "Non-nil means pushing export output to the kill ring.
 This variable is ignored during asynchronous export."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Always" t)
@@ -996,13 +996,12 @@ mode."
 				  (:copier nil))
   name parent transcoders options filters blocks menu)
 
+;;;###autoload
 (defun org-export-get-backend (name)
   "Return export back-end named after NAME.
 NAME is a symbol.  Return nil if no such back-end is found."
-  (catch 'found
-    (dolist (b org-export-registered-backends)
-      (when (eq (org-export-backend-name b) name)
-	(throw 'found b)))))
+  (cl-find-if (lambda (b) (and (eq name (org-export-backend-name b))))
+	      org-export-registered-backends))
 
 (defun org-export-register-backend (backend)
   "Register BACKEND as a known export back-end.
@@ -1070,7 +1069,9 @@ BACKEND is an export back-end, as return by, e.g,,
 for the shape of the return value.
 
 Unlike to `org-export-backend-options', this function also
-returns options inherited from parent back-ends, if any."
+returns options inherited from parent back-ends, if any.
+
+Return nil if BACKEND is unknown."
   (when (symbolp backend) (setq backend (org-export-get-backend backend)))
   (when backend
     (let ((options (org-export-backend-options backend))
@@ -1332,6 +1333,7 @@ The back-end could then be called with, for example:
 ;; along with their value in order to set them as buffer local
 ;; variables later in the process.
 
+;;;###autoload
 (defun org-export-get-environment (&optional backend subtreep ext-plist)
   "Collect export options from the current buffer.
 
@@ -1373,7 +1375,7 @@ specific items to read, if any."
 		   alist))
 	   alist))
 	;; Priority is given to back-end specific options.
-	(all (append (and backend (org-export-get-all-options backend))
+	(all (append (org-export-get-all-options backend)
 		     org-export-options-alist))
 	(plist))
     (when line
@@ -1410,7 +1412,7 @@ for export.  Return options as a plist."
 			     (match-string-no-properties 4))))))
 	 ;; Look for both general keywords and back-end specific
 	 ;; options, with priority given to the latter.
-	 (options (append (and backend (org-export-get-all-options backend))
+	 (options (append (org-export-get-all-options backend)
 			  org-export-options-alist)))
      ;; Handle other keywords.  Then return PLIST.
      (dolist (option options plist)
@@ -1446,7 +1448,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
   (let* ((case-fold-search t)
 	 (options (append
 		   ;; Priority is given to back-end specific options.
-		   (and backend (org-export-get-all-options backend))
+		   (org-export-get-all-options backend)
 		   org-export-options-alist))
 	 (regexp (format "^[ \t]*#\\+%s:"
 			 (regexp-opt (nconc (delq nil (mapcar #'cadr options))
@@ -1583,7 +1585,7 @@ which back-end specific export options should also be read in the
 process."
   (let (plist
 	;; Priority is given to back-end specific options.
-	(all (append (and backend (org-export-get-all-options backend))
+	(all (append (org-export-get-all-options backend)
 		     org-export-options-alist)))
     (dolist (cell all plist)
       (let ((prop (car cell)))
@@ -1782,12 +1784,23 @@ INFO is a plist holding export options."
 	(funcall walk-data data nil)
 	selected-trees))))
 
-(defun org-export--skip-p (blob options selected)
-  "Non-nil when element or object BLOB should be skipped during export.
+(defun org-export--skip-p (datum options selected)
+  "Non-nil when element or object DATUM should be skipped during export.
 OPTIONS is the plist holding export options.  SELECTED, when
 non-nil, is a list of headlines or inlinetasks belonging to
 a tree with a select tag."
-  (cl-case (org-element-type blob)
+  (cl-case (org-element-type datum)
+    ((comment comment-block)
+     ;; Skip all comments and comment blocks.  Make to keep maximum
+     ;; number of blank lines around the comment so as to preserve
+     ;; local structure of the document upon interpreting it back into
+     ;; Org syntax.
+     (let* ((previous (org-export-get-previous-element datum options))
+	    (before (or (org-element-property :post-blank previous) 0))
+	    (after (or (org-element-property :post-blank datum) 0)))
+       (when previous
+	 (org-element-put-property previous :post-blank (max before after 1))))
+     t)
     (clock (not (plist-get options :with-clocks)))
     (drawer
      (let ((with-drawers-p (plist-get options :with-drawers)))
@@ -1797,7 +1810,7 @@ a tree with a select tag."
 		;; every drawer whose name belong to that list.
 		;; Otherwise, ignore drawers whose name isn't in that
 		;; list.
-		(let ((name (org-element-property :drawer-name blob)))
+		(let ((name (org-element-property :drawer-name datum)))
 		  (if (eq (car with-drawers-p) 'not)
 		      (member-ignore-case name (cdr with-drawers-p))
 		    (not (member-ignore-case name with-drawers-p))))))))
@@ -1806,23 +1819,23 @@ a tree with a select tag."
      (not (plist-get options :with-footnotes)))
     ((headline inlinetask)
      (let ((with-tasks (plist-get options :with-tasks))
-	   (todo (org-element-property :todo-keyword blob))
-	   (todo-type (org-element-property :todo-type blob))
+	   (todo (org-element-property :todo-keyword datum))
+	   (todo-type (org-element-property :todo-type datum))
 	   (archived (plist-get options :with-archived-trees))
-	   (tags (org-export-get-tags blob options nil t)))
+	   (tags (org-export-get-tags datum options nil t)))
        (or
-	(and (eq (org-element-type blob) 'inlinetask)
+	(and (eq (org-element-type datum) 'inlinetask)
 	     (not (plist-get options :with-inlinetasks)))
 	;; Ignore subtrees with an exclude tag.
 	(cl-loop for k in (plist-get options :exclude-tags)
 		 thereis (member k tags))
 	;; When a select tag is present in the buffer, ignore any tree
 	;; without it.
-	(and selected (not (memq blob selected)))
+	(and selected (not (memq datum selected)))
 	;; Ignore commented sub-trees.
-	(org-element-property :commentedp blob)
+	(org-element-property :commentedp datum)
 	;; Ignore archived subtrees if `:with-archived-trees' is nil.
-	(and (not archived) (org-element-property :archivedp blob))
+	(and (not archived) (org-element-property :archivedp datum))
 	;; Ignore tasks, if specified by `:with-tasks' property.
 	(and todo
 	     (or (not with-tasks)
@@ -1834,7 +1847,7 @@ a tree with a select tag."
      (let ((properties-set (plist-get options :with-properties)))
        (cond ((null properties-set) t)
 	     ((consp properties-set)
-	      (not (member-ignore-case (org-element-property :key blob)
+	      (not (member-ignore-case (org-element-property :key datum)
 				       properties-set))))))
     (planning (not (plist-get options :with-planning)))
     (property-drawer (not (plist-get options :with-properties)))
@@ -1842,14 +1855,14 @@ a tree with a select tag."
     (table (not (plist-get options :with-tables)))
     (table-cell
      (and (org-export-table-has-special-column-p
-	   (org-export-get-parent-table blob))
-	  (org-export-first-sibling-p blob options)))
-    (table-row (org-export-table-row-is-special-p blob options))
+	   (org-export-get-parent-table datum))
+	  (org-export-first-sibling-p datum options)))
+    (table-row (org-export-table-row-is-special-p datum options))
     (timestamp
      ;; `:with-timestamps' only applies to isolated timestamps
      ;; objects, i.e. timestamp objects in a paragraph containing only
      ;; timestamps and whitespaces.
-     (when (let ((parent (org-export-get-parent-element blob)))
+     (when (let ((parent (org-export-get-parent-element datum)))
 	     (and (memq (org-element-type parent) '(paragraph verse-block))
 		  (not (org-element-map parent
 			   (cons 'plain-text
@@ -1860,9 +1873,9 @@ a tree with a select tag."
        (cl-case (plist-get options :with-timestamps)
 	 ((nil) t)
 	 (active
-	  (not (memq (org-element-property :type blob) '(active active-range))))
+	  (not (memq (org-element-property :type datum) '(active active-range))))
 	 (inactive
-	  (not (memq (org-element-property :type blob)
+	  (not (memq (org-element-property :type datum)
 		     '(inactive inactive-range)))))))))
 
 
@@ -2647,49 +2660,18 @@ The function assumes BUFFER's major mode is `org-mode'."
 			   'invisible (quote ,invis-prop))
 			 ov-set)))))))))
 
-(defun org-export--delete-comments ()
-  "Delete commented areas in the buffer.
-Commented areas are comments, comment blocks, commented trees and
-inlinetasks.  Trailing blank lines after a comment or a comment
-block are removed, as long as it doesn't alter the structure of
-the document.  Narrowing, if any, is ignored."
+(defun org-export--delete-comment-trees ()
+  "Delete commented trees and commented inlinetasks in the buffer.
+Narrowing, if any, is ignored."
   (org-with-wide-buffer
    (goto-char (point-min))
    (let* ((case-fold-search t)
-	  (comment-re "^[ \t]*#\\(?: \\|$\\|\\+end_comment\\)")
-	  (regexp (concat org-outline-regexp-bol ".*" org-comment-string "\\|"
-			  comment-re)))
+	  (regexp (concat org-outline-regexp-bol ".*" org-comment-string)))
      (while (re-search-forward regexp nil t)
        (let ((element (org-element-at-point)))
-	 (pcase (org-element-type element)
-	   ((or `headline `inlinetask)
-	    (when (org-element-property :commentedp element)
-	      (delete-region (org-element-property :begin element)
-			     (org-element-property :end element))))
-	   ((or `comment `comment-block)
-	    (let* ((parent (org-element-property :parent element))
-		   (start (org-element-property :begin element))
-		   (end (org-element-property :end element))
-		   ;; We remove trailing blank lines.  Doing so could
-		   ;; modify the structure of the document.  Therefore
-		   ;; we ensure that any comment between elements is
-		   ;; replaced with one empty line, so as to keep them
-		   ;; separated.
-		   (add-blank?
-		    (save-excursion
-		      (goto-char start)
-		      (not (or (bobp)
-			       (eq (org-element-property :contents-begin parent)
-				   start)
-			       (eq (org-element-property :contents-end parent)
-				   end)
-			       (progn
-				 (forward-line -1)
-				 (or (looking-at-p "^[ \t]*$")
-				     (org-with-limited-levels
-				      (org-at-heading-p)))))))))
-	      (delete-region start end)
-	      (when add-blank? (insert "\n"))))))))))
+	 (when (org-element-property :commentedp element)
+	   (delete-region (org-element-property :begin element)
+			  (org-element-property :end element))))))))
 
 (defun org-export--prune-tree (data info)
   "Prune non exportable elements from DATA.
@@ -2862,7 +2844,8 @@ containing their first reference."
      (org-element-create 'headline
 			 (list :footnote-section-p t
 			       :level 1
-			       :title org-footnote-section)
+			       :title org-footnote-section
+			       :raw-value org-footnote-section)
 			 (apply #'org-element-create
 				'section
 				nil
@@ -2898,83 +2881,67 @@ containing their first reference."
 
 (defun org-export--remove-uninterpreted-data (data info)
   "Change uninterpreted elements back into Org syntax.
-DATA is the parse tree.  INFO is a plist containing export
-options.  Each uninterpreted element or object is changed back
-into a string.  Contents, if any, are not modified.  The parse
-tree is modified by side effect."
-  (org-export--remove-uninterpreted-data-1 data info)
-  (dolist (entry org-export-options-alist)
-    (when (eq (nth 4 entry) 'parse)
-      (let ((p (car entry)))
-	(plist-put info
-		   p
-		   (org-export--remove-uninterpreted-data-1
-		    (plist-get info p)
-		    info))))))
-
-(defun org-export--remove-uninterpreted-data-1 (data info)
-  "Change uninterpreted elements back into Org syntax.
 DATA is a parse tree or a secondary string.  INFO is a plist
 containing export options.  It is modified by side effect and
 returned by the function."
   (org-element-map data
       '(entity bold italic latex-environment latex-fragment strike-through
 	       subscript superscript underline)
-    (lambda (blob)
+    (lambda (datum)
       (let ((new
-	     (cl-case (org-element-type blob)
+	     (cl-case (org-element-type datum)
 	       ;; ... entities...
 	       (entity
 		(and (not (plist-get info :with-entities))
 		     (list (concat
-			    (org-export-expand blob nil)
+			    (org-export-expand datum nil)
 			    (make-string
-			     (or (org-element-property :post-blank blob) 0)
+			     (or (org-element-property :post-blank datum) 0)
 			     ?\s)))))
 	       ;; ... emphasis...
 	       ((bold italic strike-through underline)
 		(and (not (plist-get info :with-emphasize))
-		     (let ((marker (cl-case (org-element-type blob)
+		     (let ((marker (cl-case (org-element-type datum)
 				     (bold "*")
 				     (italic "/")
 				     (strike-through "+")
 				     (underline "_"))))
 		       (append
 			(list marker)
-			(org-element-contents blob)
+			(org-element-contents datum)
 			(list (concat
 			       marker
 			       (make-string
-				(or (org-element-property :post-blank blob)
+				(or (org-element-property :post-blank datum)
 				    0)
 				?\s)))))))
 	       ;; ... LaTeX environments and fragments...
 	       ((latex-environment latex-fragment)
 		(and (eq (plist-get info :with-latex) 'verbatim)
-		     (list (org-export-expand blob nil))))
+		     (list (org-export-expand datum nil))))
 	       ;; ... sub/superscripts...
 	       ((subscript superscript)
 		(let ((sub/super-p (plist-get info :with-sub-superscript))
-		      (bracketp (org-element-property :use-brackets-p blob)))
+		      (bracketp (org-element-property :use-brackets-p datum)))
 		  (and (or (not sub/super-p)
 			   (and (eq sub/super-p '{}) (not bracketp)))
 		       (append
 			(list (concat
-			       (if (eq (org-element-type blob) 'subscript)
+			       (if (eq (org-element-type datum) 'subscript)
 				   "_"
 				 "^")
 			       (and bracketp "{")))
-			(org-element-contents blob)
+			(org-element-contents datum)
 			(list (concat
 			       (and bracketp "}")
-			       (and (org-element-property :post-blank blob)
+			       (and (org-element-property :post-blank datum)
 				    (make-string
-				     (org-element-property :post-blank blob)
+				     (org-element-property :post-blank datum)
 				     ?\s)))))))))))
 	(when new
-	  ;; Splice NEW at BLOB location in parse tree.
-	  (dolist (e new (org-element-extract-element blob))
-	    (unless (equal e "") (org-element-insert-before e blob))))))
+	  ;; Splice NEW at DATUM location in parse tree.
+	  (dolist (e new (org-element-extract-element datum))
+	    (unless (equal e "") (org-element-insert-before e datum))))))
     info nil nil t)
   ;; Return modified parse tree.
   data)
@@ -3044,7 +3011,7 @@ Return code as a string."
 			     (org-export-backend-name backend))
 	 ;; Include files, delete comments and expand macros.
 	 (org-export-expand-include-keyword)
-	 (org-export--delete-comments)
+	 (org-export--delete-comment-trees)
 	 (org-macro-initialize-templates)
 	 (org-macro-replace-all org-macro-templates nil parsed-keywords)
 	 ;; Refresh buffer properties and radio targets after
@@ -3065,12 +3032,22 @@ Return code as a string."
 			       (org-export-backend-name backend)))
 	 (org-set-regexps-and-options)
 	 (org-update-radio-target-regexp)
-	 ;; Update communication channel with environment.  Also
-	 ;; install user's and developer's filters.
+	 ;; Update communication channel with environment.
 	 (setq info
-	       (org-export-install-filters
-		(org-combine-plists
-		 info (org-export-get-environment backend subtreep ext-plist))))
+	       (org-combine-plists
+		info (org-export-get-environment backend subtreep ext-plist)))
+	 ;; De-activate uninterpreted data from parsed keywords.
+	 (dolist (entry (append (org-export-get-all-options backend)
+				org-export-options-alist))
+	   (pcase entry
+	     (`(,p ,_ ,_ ,_ parse)
+	      (let ((value (plist-get info p)))
+		(plist-put info
+			   p
+			   (org-export--remove-uninterpreted-data value info))))
+	     (_ nil)))
+	 ;; Install user's and developer's filters.
+	 (setq info (org-export-install-filters info))
 	 ;; Call options filters and update export options.  We do not
 	 ;; use `org-export-filter-apply-functions' here since the
 	 ;; arity of such filters is different.
@@ -4287,8 +4264,7 @@ significant."
 		 (and (org-export-match-search-cell-p datum search-cells)
 		      datum)))))
 	(unless matches
-	  (signal 'org-link-broken
-		  (list (org-element-property :raw-path link))))
+	  (signal 'org-link-broken (list (org-element-property :path link))))
 	(puthash
 	 search-cells
 	 ;; There can be multiple matches for un-typed searches, i.e.,
@@ -4344,11 +4320,13 @@ has type \"radio\"."
 
 (defun org-export-file-uri (filename)
   "Return file URI associated to FILENAME."
-  (cond ((string-match-p "\\`//" filename) (concat "file:" filename))
+  (cond ((string-prefix-p "//" filename) (concat "file:" filename))
 	((not (file-name-absolute-p filename)) filename)
 	((org-file-remote-p filename) (concat "file:/" filename))
-	(t (concat "file://" (expand-file-name filename)))))
-
+	(t
+	 (let ((fullname (expand-file-name filename)))
+	   (concat (if (string-prefix-p "/" fullname) "file://" "file:///")
+		   fullname)))))
 
 ;;;; For References
 ;;
@@ -4526,7 +4504,7 @@ ELEMENT doesn't allow line numbering."
 	     (let ((linum (org-element-property :number-lines el)))
 	       (when linum
 		 (let ((lines (org-count-lines
-			       (org-trim (org-element-property :value el)))))
+			       (org-element-property :value el))))
 		   ;; Accumulate locs or reset them.
 		   (pcase linum
 		     (`(new . ,n) (setq loc (+ n lines)))
@@ -4545,30 +4523,28 @@ an alist between relative line number (integer) and name of code
 reference on that line (string)."
   (let* ((line 0) refs
 	 (value (org-element-property :value element))
-	 ;; Get code and clean it.  Remove blank lines at its
-	 ;; beginning and end.
+	 ;; Remove global indentation from code, if necessary.  Also
+	 ;; remove final newline character, since it doesn't belongs
+	 ;; to the code proper.
 	 (code (replace-regexp-in-string
-		"\\`\\([ \t]*\n\\)+" ""
-		(replace-regexp-in-string
-		 "\\([ \t]*\n\\)*[ \t]*\\'" "\n"
-		 (if (or org-src-preserve-indentation
-			 (org-element-property :preserve-indent element))
-		     value
-		   (org-remove-indentation value)))))
+		"\n\\'" ""
+		(if (or org-src-preserve-indentation
+			(org-element-property :preserve-indent element))
+		    value
+		  (org-remove-indentation value))))
 	 ;; Build a regexp matching a loc with a reference.
 	 (ref-re (org-src-coderef-regexp (org-src-coderef-format element))))
     ;; Return value.
     (cons
      ;; Code with references removed.
-     (org-element-normalize-string
-      (mapconcat
-       (lambda (loc)
-	 (cl-incf line)
-	 (if (not (string-match ref-re loc)) loc
-	   ;; Ref line: remove ref, and signal its position in REFS.
-	   (push (cons line (match-string 3 loc)) refs)
-	   (replace-match "" nil nil loc 1)))
-       (org-split-string code "\n") "\n"))
+     (mapconcat
+      (lambda (loc)
+	(cl-incf line)
+	(if (not (string-match ref-re loc)) loc
+	  ;; Ref line: remove ref, and add its position in REFS.
+	  (push (cons line (match-string 3 loc)) refs)
+	  (replace-match "" nil nil loc 1)))
+      (split-string code "\n") "\n")
      ;; Reference alist.
      refs)))
 
@@ -4591,15 +4567,16 @@ number (i.e. ignoring NUM-LINES) and the name of the code
 reference on it.  If it is nil, FUN's third argument will always
 be nil.  It can be obtained through the use of
 `org-export-unravel-code' function."
-  (let ((--locs (org-split-string code "\n"))
+  (let ((--locs (split-string code "\n"))
 	(--line 0))
-    (org-element-normalize-string
+    (concat
      (mapconcat
       (lambda (--loc)
 	(cl-incf --line)
 	(let ((--ref (cdr (assq --line ref-alist))))
 	  (funcall fun --loc (and num-lines (+ num-lines --line)) --ref)))
-      --locs "\n"))))
+      --locs "\n")
+     "\n")))
 
 (defun org-export-format-code-default (element info)
   "Return source code from ELEMENT, formatted in a standard way.
@@ -4616,7 +4593,7 @@ code."
   ;; Extract code and references.
   (let* ((code-info (org-export-unravel-code element))
          (code (car code-info))
-	 (code-lines (org-split-string code "\n")))
+	 (code-lines (split-string code "\n")))
     (if (null code-lines) ""
       (let* ((refs (and (org-element-property :retain-labels element)
 			(cdr code-info)))
@@ -4641,9 +4618,9 @@ code."
 	      number-str
 	      loc
 	      (and ref
-		   (concat (make-string
-			    (- (+ 6 max-width)
-			       (+ (length loc) (length number-str))) ? )
+		   (concat (make-string (- (+ 6 max-width)
+					   (+ (length loc) (length number-str)))
+					?\s)
 			   (format "(%s)" ref))))))
 	 num-start refs)))))
 

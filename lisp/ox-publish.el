@@ -1,5 +1,5 @@
 ;;; ox-publish.el --- Publish Related Org Mode Files as a Website -*- lexical-binding: t; -*-
-;; Copyright (C) 2006-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2006-2017 Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Carsten Dominik <carsten DOT dominik AT gmail DOT com>
@@ -104,7 +104,8 @@ Most properties are optional, but some should always be set:
 
     Extension (without the dot!) of source files.  This can be
     a regular expression.  If not given, \"org\" will be used as
-    default extension.
+    default extension.  If it is `any', include all the files,
+    even without extension.
 
   `:publishing-directory'
 
@@ -362,7 +363,7 @@ still decide about that independently."
 		filename pub-dir pub-func base-dir))))
     (if rtn (message "Publishing file %s using `%s'" filename pub-func)
       (when org-publish-list-skipped-files
-	(message   "Skipping unmodified file %s" filename)))
+	(message "Skipping unmodified file %s" filename)))
     rtn))
 
 (defun org-publish-update-timestamp
@@ -384,6 +385,15 @@ If there is no timestamp, create one."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Getting project information out of `org-publish-project-alist'
+
+(defun org-publish-property (property project &optional default)
+  "Return value PROPERTY, as a symbol, in PROJECT.
+DEFAULT is returned when PROPERTY is not actually set in PROJECT
+definition."
+  (let ((properties (cdr project)))
+    (if (plist-member properties property)
+	(plist-get properties property)
+      default)))
 
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects in PROJECTS-ALIST.
@@ -526,34 +536,61 @@ matching filenames."
 		  org-publish-temp-files))))
 
 (defun org-publish-get-project-from-filename (filename &optional up)
-  "Return the project that FILENAME belongs to."
+  "Return a project that FILENAME belongs to.
+When UP is non-nil, return a meta-project (i.e., with a :components part)
+publishing FILENAME."
   (let* ((filename (expand-file-name filename))
-	 project-name)
-
-    (catch 'p-found
-      (dolist (prj org-publish-project-alist)
-	(unless (plist-get (cdr prj) :components)
-	  ;; [[info:org:Selecting%20files]] shows how this is supposed to work:
-	  (let* ((r (plist-get (cdr prj) :recursive))
-		 (b (expand-file-name (file-name-as-directory
-				       (plist-get (cdr prj) :base-directory))))
-		 (x (or (plist-get (cdr prj) :base-extension) "org"))
-		 (e (plist-get (cdr prj) :exclude))
-		 (i (plist-get (cdr prj) :include))
-		 (xm (concat "^" b (if r ".+" "[^/]+") "\\.\\(" x "\\)$")))
-	    (when
-		(or (and i
-			 (member filename
-				 (dolist (file i) (expand-file-name file b))))
-		    (and (not (and e (string-match e filename)))
-			 (string-match xm filename)))
-	      (setq project-name (car prj))
-	      (throw 'p-found project-name))))))
-    (when up
-      (dolist (prj org-publish-project-alist)
-	(if (member project-name (plist-get (cdr prj) :components))
-	    (setq project-name (car prj)))))
-    (assoc project-name org-publish-project-alist)))
+	 (project
+	  (cl-some
+	   (lambda (p)
+	     ;; Ignore meta-projects.
+	     (unless (org-publish-property :components p)
+	       (let ((base (file-truename
+			    (org-publish-property :base-directory p))))
+		 (cond
+		  ;; Check if FILENAME is explicitly included in one
+		  ;; project.
+		  ((cl-some (lambda (f) (file-equal-p f filename))
+			    (mapcar (lambda (f) (expand-file-name f base))
+				    (org-publish-property :include p)))
+		   p)
+		  ;; Exclude file names matching :exclude property.
+		  ((let ((exclude-re (org-publish-property :exclude p)))
+		     (and exclude-re
+			  (string-match-p exclude-re
+					  (file-relative-name filename base))))
+		   nil)
+		  ;; Check :extension.  Handle special `any'
+		  ;; extension.
+		  ((let ((extension (org-publish-property :base-extension p)))
+		     (not (or (eq extension 'any)
+			      (string= (or extension "org")
+				       (file-name-extension filename)))))
+		   nil)
+		  ;; Check if FILENAME belong to project's base
+		  ;; directory, or some of its sub-directories
+		  ;; if :recursive in non-nil.
+		  ((org-publish-property :recursive p)
+		   (and (file-in-directory-p filename base) p))
+		  ((file-equal-p base (file-name-directory filename)) p)
+		  (t nil)))))
+	   org-publish-project-alist)))
+    (cond
+     ((not project) nil)
+     ((not up) project)
+     ;; When optional argument UP is non-nil, return the top-most
+     ;; meta-project effectively publishing FILENAME.
+     (t
+      (letrec ((find-parent-project
+		(lambda (project)
+		  (or (cl-some
+		       (lambda (p)
+			 (and (member (car project)
+				      (org-publish-property :components p))
+			      (funcall find-parent-project p)))
+		       org-publish-project-alist)
+		      project))))
+	(funcall find-parent-project project))))))
 
 
 
@@ -591,7 +628,8 @@ Return output file name."
 	       plist
 	       `(:crossrefs
 		 ,(org-publish-cache-get-file-property
-		   (expand-file-name filename) :crossrefs nil t)
+		   ;; Normalize file names in cache.
+		   (file-truename filename) :crossrefs nil t)
 		 :filter-final-output
 		 (org-publish--store-crossrefs
 		  org-publish-collect-index
@@ -610,9 +648,9 @@ Return output file name."
   (unless (file-directory-p pub-dir)
     (make-directory pub-dir t))
   (let ((output (expand-file-name (file-name-nondirectory filename) pub-dir)))
-    (or (equal (expand-file-name (file-name-directory filename))
-	       (file-name-as-directory (expand-file-name pub-dir)))
-	(copy-file filename output t))
+    (unless (file-equal-p (expand-file-name (file-name-directory filename))
+			  (file-name-as-directory (expand-file-name pub-dir)))
+      (copy-file filename output t))
     ;; Return file name.
     output))
 
@@ -629,42 +667,38 @@ files, when entire projects are published (see
 `org-publish-projects')."
   (let* ((project
 	  (or project
-	      (or (org-publish-get-project-from-filename filename)
-		  (error "File %s not part of any known project"
-			 (abbreviate-file-name filename)))))
+	      (org-publish-get-project-from-filename filename)
+	      (user-error "File %S is not part of any known project"
+			  (abbreviate-file-name filename))))
 	 (project-plist (cdr project))
-	 (ftname (expand-file-name filename))
 	 (publishing-function
-	  (let ((fun (plist-get project-plist :publishing-function)))
-	    (cond ((null fun) (error "No publishing function chosen"))
-		  ((listp fun) fun)
-		  (t (list fun)))))
+	  (pcase (plist-get project-plist :publishing-function)
+	    (`nil (user-error "No publishing function chosen"))
+	    ((and f (pred listp)) f)
+	    (f (list f))))
 	 (base-dir
 	  (file-name-as-directory
-	   (expand-file-name
-	    (or (plist-get project-plist :base-directory)
-		(error "Project %s does not have :base-directory defined"
-		       (car project))))))
-	 (pub-dir
+	   (or (org-publish-property :base-directory project)
+	       (user-error "Project %S does not have :base-directory defined"
+			   (car project)))))
+	 (pub-base-dir
 	  (file-name-as-directory
-	   (file-truename
-	    (or (eval (plist-get project-plist :publishing-directory))
-		(error "Project %s does not have :publishing-directory defined"
-		       (car project))))))
-	 tmp-pub-dir)
+	   (or (org-publish-property :publishing-directory project)
+	       (user-error
+		"Project %S does not have :publishing-directory defined"
+		(car project)))))
+	 (pub-dir
+	  (file-name-directory
+	   (expand-file-name (file-relative-name filename base-dir)
+			     pub-base-dir))))
 
     (unless no-cache (org-publish-initialize-cache (car project)))
 
-    (setq tmp-pub-dir
-	  (file-name-directory
-	   (concat pub-dir
-		   (and (string-match (regexp-quote base-dir) ftname)
-			(substring ftname (match-end 0))))))
     ;; Allow chain of publishing functions.
     (dolist (f publishing-function)
-      (when (org-publish-needed-p filename pub-dir f tmp-pub-dir base-dir)
-	(let ((output (funcall f project-plist filename tmp-pub-dir)))
-	  (org-publish-update-timestamp filename pub-dir f base-dir)
+      (when (org-publish-needed-p filename pub-base-dir f pub-dir base-dir)
+	(let ((output (funcall f project-plist filename pub-dir)))
+	  (org-publish-update-timestamp filename pub-base-dir f base-dir)
 	  (run-hook-with-args 'org-publish-after-publishing-hook
 			      filename
 			      output))))
@@ -697,7 +731,7 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	       (or (plist-get project-plist :sitemap-file-entry-format)
 		   org-publish-sitemap-file-entry-format)))
 	  (funcall sitemap-function project sitemap-filename)))
-      ;; Publish all files from PROJECT excepted "theindex.org".  Its
+      ;; Publish all files from PROJECT except "theindex.org".  Its
       ;; publishing will be deferred until "theindex.inc" is
       ;; populated.
       (let ((theindex
@@ -705,7 +739,8 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 			       (plist-get project-plist :base-directory)))
 	    (exclude-regexp (plist-get project-plist :exclude)))
 	(dolist (file (org-publish-get-base-files project exclude-regexp))
-	  (unless (equal file theindex) (org-publish-file file project t)))
+	  (unless (file-equal-p file theindex)
+	    (org-publish-file file project t)))
 	;; Populate "theindex.inc", if needed, and publish
 	;; "theindex.org".
 	(when (plist-get project-plist :makeindex)
@@ -725,13 +760,13 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 	 (dir (file-name-as-directory
 	       (plist-get project-plist :base-directory)))
 	 (localdir (file-name-directory dir))
-	 (indent-str (make-string 2 ?\ ))
+	 (indent-str (make-string 2 ?\s))
 	 (exclude-regexp (plist-get project-plist :exclude))
 	 (files (nreverse
 		 (org-publish-get-base-files project exclude-regexp)))
 	 (sitemap-filename (concat dir (or sitemap-filename "sitemap.org")))
 	 (sitemap-title (or (plist-get project-plist :sitemap-title)
-			  (concat "Sitemap for project " (car project))))
+			    (concat "Sitemap for project " (car project))))
 	 (sitemap-style (or (plist-get project-plist :sitemap-style)
 			    'tree))
 	 (sitemap-sans-extension
@@ -750,8 +785,7 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 	  (when sitemap-sans-extension
 	    (setq link (file-name-sans-extension link)))
 	  ;; sitemap shouldn't list itself
-	  (unless (equal (file-truename sitemap-filename)
-			 (file-truename file))
+	  (unless (file-equal-p sitemap-filename file)
 	    (if (eq sitemap-style 'list)
 		(message "Generating list-style sitemap for %s" sitemap-title)
 	      (message "Generating tree-style sitemap for %s" sitemap-title)
@@ -970,7 +1004,7 @@ PARENT is a reference to the headline, if any, containing the
 original index keyword.  When non-nil, this reference is a cons
 cell.  Its CAR is a symbol among `id', `custom-id' and `name' and
 its CDR is a string."
-  (let ((file (plist-get info :input-file)))
+  (let ((file (file-truename (plist-get info :input-file))))
     (org-publish-cache-set-file-property
      file :index
      (delete-dups
@@ -1040,7 +1074,7 @@ publishing directory."
 	      (dotimes (n len)
 		(insert
 		 (concat
-		  (make-string (* (+ rank n) 2) ? ) "  - "
+		  (make-string (* (+ rank n) 2) ?\s) "  - "
 		  (if (not (= (1- len) n)) (nth (+ rank n) entry)
 		    ;; Last term: Link it to TARGET, if possible.
 		    (let ((target (nth 2 idx)))
@@ -1080,7 +1114,8 @@ a plist.
 This function is meant to be used as a final output filter.  See
 `org-publish-org-to'."
   (org-publish-cache-set-file-property
-   (plist-get info :input-file) :crossrefs
+   (file-truename (plist-get info :input-file))
+   :crossrefs
    ;; Update `:crossrefs' so as to remove unused references and search
    ;; cells.  Actually used references are extracted from
    ;; `:internal-references', with references as strings removed.  See
@@ -1110,7 +1145,7 @@ references with `org-export-get-reference'."
 		 search
 		 file)
 	"MissingReference")
-    (let* ((filename (expand-file-name file))
+    (let* ((filename (file-truename file))
 	   (crossrefs
 	    (org-publish-cache-get-file-property filename :crossrefs nil t))
 	   (cells (org-export-string-to-search-cell search)))
@@ -1249,23 +1284,19 @@ will be created.  Return VALUE."
        filename property value nil project-name))))
 
 (defun org-publish-cache-get-file-property
-  (filename property &optional default no-create project-name)
+    (filename property &optional default no-create project-name)
   "Return the value for a PROPERTY of file FILENAME in publishing cache.
 Use cache file of PROJECT-NAME.  Return the value of that PROPERTY,
 or DEFAULT, if the value does not yet exist.  Create the entry,
 if necessary, unless NO-CREATE is non-nil."
-  ;; Evtl. load the requested cache file:
-  (if project-name (org-publish-initialize-cache project-name))
-  (let ((pl (org-publish-cache-get filename)) retval)
-    (if pl
-	(if (plist-member pl property)
-	    (setq retval (plist-get pl property))
-	  (setq retval default))
-      ;; no pl yet:
-      (unless no-create
-	(org-publish-cache-set filename (list property default)))
-      (setq retval default))
-    retval))
+  (when project-name (org-publish-initialize-cache project-name))
+  (let ((properties (org-publish-cache-get filename)))
+    (cond ((null properties)
+	   (unless no-create
+	     (org-publish-cache-set filename (list property default)))
+	   default)
+	  ((plist-member properties property) (plist-get properties property))
+	  (t default))))
 
 (defun org-publish-cache-get (key)
   "Return the value stored in `org-publish-cache' for key KEY.

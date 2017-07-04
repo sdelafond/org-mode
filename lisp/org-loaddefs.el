@@ -963,17 +963,19 @@ archive file is.
 
 (autoload 'org-archive-subtree "org-archive" "\
 Move the current subtree to the archive.
-The archive can be a certain top-level heading in the current file, or in
-a different file.  The tree will be moved to that location, the subtree
-heading be marked DONE, and the current time will be added.
+The archive can be a certain top-level heading in the current
+file, or in a different file.  The tree will be moved to that
+location, the subtree heading be marked DONE, and the current
+time will be added.
 
-When called with a single prefix argument FIND-DONE, find whole trees without any
-open TODO items and archive them (after getting confirmation from the user).
-When called with a double prefix argument, find whole trees with timestamps before
-today and archive them (after getting confirmation from the user).
-If the cursor is not at a headline when these commands are called, try all level
-1 trees.  If the cursor is on a headline, only try the direct children of
-this heading.
+When called with a single prefix argument FIND-DONE, find whole
+trees without any open TODO items and archive them (after getting
+confirmation from the user).  When called with a double prefix
+argument, find whole trees with timestamps before today and
+archive them (after getting confirmation from the user).  If the
+cursor is not at a headline when these commands are called, try
+all level 1 trees.  If the cursor is on a headline, only try the
+direct children of this heading.
 
 \(fn &optional FIND-DONE)" t nil)
 
@@ -2039,13 +2041,14 @@ any of (?a ?A ?n ?N ?t ?T ?f ?F) where the capital letters indicate that
 sorting should be done in reverse order.
 
 If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
-a function to be called to extract the key.  It must return either
-a string or a number that should serve as the sorting key for that
-row.  It will then use COMPARE-FUNC to compare entries.  If GETKEY-FUNC
-is specified interactively, the comparison will be either a string or
-numeric compare based on the type of the first key in the table.
+a function to be called to extract the key.  It must return a value
+that is compatible with COMPARE-FUNC, the function used to compare
+entries.
 
-\(fn WITH-CASE &optional SORTING-TYPE GETKEY-FUNC COMPARE-FUNC)" t nil)
+A non-nil value for INTERACTIVE? is used to signal that this
+function is being called interactively.
+
+\(fn &optional WITH-CASE SORTING-TYPE GETKEY-FUNC COMPARE-FUNC INTERACTIVE\\=\\?)" t nil)
 
 (autoload 'org-table-cut-region "org-table" "\
 Copy region in table to the clipboard and blank all relevant fields.
@@ -2717,9 +2720,9 @@ Store an org-link to the current location.
 This link is added to `org-stored-links' and can later be inserted
 into an Org buffer with `org-insert-link' (`\\[org-insert-link]').
 
-For some link types, a `\\[universal-argument]' prefix ARG is interpreted.
-For links to Usenet articles, ARG negates `org-gnus-prefer-web-links'.
-For file links, ARG negates `org-context-in-file-links'.
+For some link types, a `\\[universal-argument]' prefix ARG is interpreted.  A single
+`\\[universal-argument]' negates `org-context-in-file-links' for file links or
+`org-gnus-prefer-web-links' for links to Usenet articles.
 
 A `\\[universal-argument] \\[universal-argument]' prefix ARG forces skipping storing functions that are not
 part of Org core.
@@ -3193,6 +3196,17 @@ The file is stored under the name chosen in
 ;;;### (autoloads nil "ox-latex" "ox-latex.el" (0 0 0 0))
 ;;; Generated autoloads from ox-latex.el
 
+(autoload 'org-latex-make-preamble "ox-latex" "\
+Return a formatted LaTeX preamble.
+INFO is a plist used as a communication channel.  Optional
+argument TEMPLATE, when non-nil, is the header template string,
+as expected by `org-splice-latex-header'.  When SNIPPET? is
+non-nil, only includes packages relevant to image generation, as
+specified in `org-latex-default-packages-alist' or
+`org-latex-packages-alist'.
+
+\(fn INFO &optional TEMPLATE SNIPPET\\=\\?)" nil nil)
+
 (autoload 'org-latex-export-as-latex "ox-latex" "\
 Export current buffer as a LaTeX buffer.
 
@@ -3615,6 +3629,27 @@ command to convert it.
 
 ;;;### (autoloads nil "ox" "ox.el" (0 0 0 0))
 ;;; Generated autoloads from ox.el
+
+(autoload 'org-export-get-backend "ox" "\
+Return export back-end named after NAME.
+NAME is a symbol.  Return nil if no such back-end is found.
+
+\(fn NAME)" nil nil)
+
+(autoload 'org-export-get-environment "ox" "\
+Collect export options from the current buffer.
+
+Optional argument BACKEND is an export back-end, as returned by
+`org-export-create-backend'.
+
+When optional argument SUBTREEP is non-nil, assume the export is
+done against the current sub-tree.
+
+Third optional argument EXT-PLIST is a property list with
+external parameters overriding Org default settings, but still
+inferior to file-local settings.
+
+\(fn &optional BACKEND SUBTREEP EXT-PLIST)" nil nil)
 
 (autoload 'org-export-as "ox" "\
 Transcode current Org buffer into BACKEND code.

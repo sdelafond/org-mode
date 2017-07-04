@@ -1,6 +1,6 @@
 ;;; ob-exp.el --- Exportation of Babel Source Blocks -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2009-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
 ;; Authors: Eric Schulte
 ;;	Dan Davison
@@ -159,8 +159,24 @@ this template."
 	      (goto-char (point-min))
 	      (while (re-search-forward regexp nil t)
 		(unless (save-match-data (org-in-commented-heading-p))
-		  (let* ((element (save-match-data (org-element-context)))
-			 (type (org-element-type element))
+		  (let* ((object? (match-end 1))
+			 (element (save-match-data
+				    (if object? (org-element-context)
+				      ;; No deep inspection if we're
+				      ;; just looking for an element.
+				      (org-element-at-point))))
+			 (type
+			  (pcase (org-element-type element)
+			    ;; Discard block elements if we're looking
+			    ;; for inline objects.  False results
+			    ;; happen when, e.g., "call_" syntax is
+			    ;; located within affiliated keywords:
+			    ;;
+			    ;; #+name: call_src
+			    ;; #+begin_src ...
+			    ((and (or `babel-call `src-block) (guard object?))
+			     nil)
+			    (type type)))
 			 (begin
 			  (copy-marker (org-element-property :begin element)))
 			 (end
@@ -323,7 +339,7 @@ defined for the code block may be used as a key and will be
 replaced with its value."
   :group 'org-babel
   :type 'string
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3"))
 
 (defun org-babel-exp-code (info type)

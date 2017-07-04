@@ -1,6 +1,6 @@
 ;;; org-table.el --- The Table Editor for Org        -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -265,7 +265,7 @@ t       accept as input and present for editing"
   "Non-nil means increment when copying current field with \
 `\\[org-table-copy-down]'."
   :group 'org-table-calculation
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Use the difference between the current and the above fields" t)
@@ -378,7 +378,7 @@ portability of tables."
   "Non-nil means that evaluation of a field formula can add new
 columns if an out-of-bounds field is being set."
   :group 'org-table-calculation
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Setting an out-of-bounds field generates an error (default)" nil)
@@ -407,7 +407,7 @@ The function can be slow on larger regions; this safety feature
 prevents it from hanging emacs."
   :group 'org-table-import-export
   :type 'integer
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3"))
 
 (defconst org-table-auto-recalculate-regexp "^[ \t]*| *# *\\(|\\|$\\)"
@@ -1155,7 +1155,7 @@ to a number.  In the case of a timestamp, increment by days."
 			      (- (org-time-string-to-absolute txt)
 				 (org-time-string-to-absolute txt-up)))
 			     ((string-match org-ts-regexp3 txt) 1)
-			     ((string-match "^[0-9]+\\(\.[0-9]+\\)?" txt-up)
+			     ((string-match "\\([-+]\\)?[0-9]+\\(?:\.[0-9]+\\)?" txt-up)
 			      (- (string-to-number txt)
 				 (string-to-number (match-string 0 txt-up))))
 			     (t 1)))
@@ -1250,21 +1250,21 @@ Return t when the line exists, nil if it does not exist."
 
 (defun org-table-get-field (&optional n replace)
   "Return the value of the field in column N of current row.
-N defaults to current field.
-If REPLACE is a string, replace field with this value.  The return value
-is always the old value."
-  (and n (org-table-goto-column n))
+N defaults to current column.  If REPLACE is a string, replace
+field with this value.  The return value is always the old
+value."
+  (when n (org-table-goto-column n))
   (skip-chars-backward "^|\n")
-  (backward-char 1)
-  (if (looking-at "|[^|\r\n]*")
-      (let* ((pos (match-beginning 0))
-	     (val (buffer-substring (1+ pos) (match-end 0))))
-	(if replace
-	    (replace-match (concat "|" (if (equal replace "") " " replace))
-			   t t))
-	(goto-char (min (point-at-eol) (+ 2 pos)))
-	val)
-    (forward-char 1) ""))
+  (if (or (bolp) (looking-at-p "[ \t]*$"))
+      ;; Before first column or after last one.
+      ""
+    (looking-at "[^|\r\n]*")
+    (let* ((pos (match-beginning 0))
+	   (val (buffer-substring pos (match-end 0))))
+      (when replace
+	(replace-match (if (equal replace "") " " replace) t t))
+      (goto-char (min (line-end-position) (1+ pos)))
+      val)))
 
 ;;;###autoload
 (defun org-table-field-info (_arg)
@@ -1494,7 +1494,9 @@ non-nil, the one above is used."
        (unless (org-at-table-hline-p)
 	 (org-table-goto-column col1 t)
 	 (when (looking-at "|\\([^|\n]+\\)|\\([^|\n]+\\)|")
-	   (replace-match "|\\2|\\1|")))
+           (transpose-regions
+            (match-beginning 1) (match-end 1)
+            (match-beginning 2) (match-end 2))))
        (forward-line)))
     (set-marker end nil)
     (org-table-goto-column colpos)
@@ -1645,7 +1647,8 @@ In particular, this does handle wide and invisible characters."
 			      dline -1 dline))))
 
 ;;;###autoload
-(defun org-table-sort-lines (with-case &optional sorting-type getkey-func compare-func)
+(defun org-table-sort-lines
+    (&optional with-case sorting-type getkey-func compare-func interactive?)
   "Sort table lines according to the column at point.
 
 The position of point indicates the column to be used for
@@ -1669,12 +1672,13 @@ any of (?a ?A ?n ?N ?t ?T ?f ?F) where the capital letters indicate that
 sorting should be done in reverse order.
 
 If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
-a function to be called to extract the key.  It must return either
-a string or a number that should serve as the sorting key for that
-row.  It will then use COMPARE-FUNC to compare entries.  If GETKEY-FUNC
-is specified interactively, the comparison will be either a string or
-numeric compare based on the type of the first key in the table."
-  (interactive "P")
+a function to be called to extract the key.  It must return a value
+that is compatible with COMPARE-FUNC, the function used to compare
+entries.
+
+A non-nil value for INTERACTIVE? is used to signal that this
+function is being called interactively."
+  (interactive (list current-prefix-arg nil nil nil t))
   (when (org-region-active-p) (goto-char (region-beginning)))
   ;; Point must be either within a field or before a data line.
   (save-excursion
@@ -1684,7 +1688,7 @@ numeric compare based on the type of the first key in the table."
   ;; Set appropriate case sensitivity and column used for sorting.
   (let ((column (let ((c (org-table-current-column)))
 		  (cond ((> c 0) c)
-			((called-interactively-p 'any)
+			(interactive?
 			 (read-number "Use column N for sorting: "))
 			(t 1))))
 	(sorting-type
@@ -1732,17 +1736,21 @@ numeric compare based on the type of the first key in the table."
 			 (t 0))))
 		((?f ?F)
 		 (or getkey-func
-		     (and (called-interactively-p 'any)
-			  (intern
-			   (completing-read "Sort using function: "
-					    obarray #'fboundp t)))
+		     (and interactive?
+			  (org-read-function "Function for extracting keys: "))
 		     (error "Missing key extractor to sort rows")))
 		(t (user-error "Invalid sorting type `%c'" sorting-type))))
 	     (predicate
 	      (cl-case sorting-type
 		((?n ?N ?t ?T) #'<)
 		((?a ?A) #'string<)
-		((?f ?F) compare-func))))
+		((?f ?F)
+		 (or compare-func
+		     (and interactive?
+			  (org-read-function
+			   (concat "Fuction for comparing keys "
+				   "(empty for default `sort-subr' predicate): ")
+			   'allow-empty)))))))
 	(goto-char (point-min))
 	(sort-subr (memq sorting-type '(?A ?N ?T ?F))
 		   (lambda ()
@@ -4472,7 +4480,7 @@ to execute outside of tables."
 	"--"
 	("Radio tables"
 	 ["Insert table template" orgtbl-insert-radio-table
-	  (assq major-mode orgtbl-radio-table-templates)]
+	  (cl-assoc-if #'derived-mode-p orgtbl-radio-table-templates)]
 	 ["Comment/uncomment table" orgtbl-toggle-comment t])
 	"--"
 	["Set Column Formula" org-table-eval-formula :active (org-at-table-p) :keys "C-c ="]
@@ -4721,7 +4729,7 @@ First element has index 0, or I0 if given."
 (defun orgtbl-insert-radio-table ()
   "Insert a radio table template appropriate for this major mode."
   (interactive)
-  (let* ((e (assq major-mode orgtbl-radio-table-templates))
+  (let* ((e (cl-assoc-if #'derived-mode-p orgtbl-radio-table-templates))
 	 (txt (nth 1 e))
 	 name pos)
     (unless e (user-error "No radio table setup defined for %s" major-mode))

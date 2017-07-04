@@ -1,6 +1,6 @@
 ;;; ox-latex.el --- LaTeX Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2011-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -100,8 +100,10 @@
 	      (if a (org-latex-export-to-pdf t s v b)
 		(org-open-file (org-latex-export-to-pdf nil s v b)))))))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
+		   (:filter-paragraph . org-latex-clean-invalid-line-breaks)
 		   (:filter-parse-tree org-latex-math-block-tree-filter
-				       org-latex-matrices-tree-filter))
+				       org-latex-matrices-tree-filter)
+		   (:filter-verse-block . org-latex-clean-invalid-line-breaks))
   :options-alist
   '((:latex-class "LATEX_CLASS" nil org-latex-default-class t)
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
@@ -329,7 +331,7 @@ Otherwise, place it near the end.  When value is a list of
 symbols, put caption above selected elements only.  Allowed
 symbols are: `image', `table', `src-block' and `special-block'."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "For all elements" t)
@@ -392,7 +394,7 @@ labeling scheme to generate labels and resolve links into proper
 references."
   :group 'org-export-latex
   :type 'boolean
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3"))
 
 ;;;; Preamble
@@ -574,14 +576,14 @@ precedence over this variable."
 The format string should have at most one \"%s\"-expression,
 which is replaced with the subtitle."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(string :tag "Format string"))
 
 (defcustom org-latex-subtitle-separate nil
   "Non-nil means the subtitle is not typeset as part of title."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'boolean)
 
@@ -618,7 +620,7 @@ inserted.
 Setting :latex-hyperref-template in publishing projects will take
 precedence over this variable."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice (const :tag "No template" nil)
 		 (string :tag "Format string")))
@@ -659,7 +661,7 @@ The function result will be used in the section format string."
 	  (const :tag "Use plain superscript (default)" "\\textsuperscript{\\ref{%s}}")
 	  (const :tag "Use Memoir/KOMA-Script footref" "\\footref{%s}")
 	  (string :tag "Other format string"))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 ;;;; Timestamps
@@ -685,7 +687,7 @@ The function result will be used in the section format string."
 (defcustom org-latex-images-centered t
   "When non-nil, images are centered."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type 'boolean
   :safe #'booleanp)
@@ -719,7 +721,7 @@ environment."
   "Default position for LaTeX figures."
   :group 'org-export-latex
   :type 'string
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :safe #'stringp)
 
@@ -842,7 +844,7 @@ to typeset and try to protect special characters.
 If no association can be found for a given markup, text will be
 returned as-is."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'alist
   :options '(bold code italic strike-through underline verbatim))
@@ -884,7 +886,7 @@ The function must accept seven parameters:
 The function should return the string to be exported."
   :group 'org-export-latex
   :type 'function
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3"))
 
 
@@ -1089,7 +1091,7 @@ will produce
 	  (list
 	   (symbol :tag "Language name                    ")
 	   (string :tag "Environment name or format string")))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 
@@ -1104,7 +1106,7 @@ See also `org-latex-compiler'."
 	  (const :tag "latex-mode file variable" "%% -*- latex-run-command: %s -*-\n")
 	  (const :tag "AUCTeX file variable" "%% -*- LaTeX-command: %s -*-\n")
 	  (string :tag "custom format" "%% %s"))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defcustom org-latex-compiler "pdflatex"
@@ -1119,7 +1121,7 @@ Can also be set in buffers via #+LATEX_COMPILER.  See also
 	  (const :tag "XeLaTeX"  "xelatex")
 	  (const :tag "LuaLaTeX" "lualatex")
 	  (const :tag "Unset" ""))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defconst org-latex-compilers '("pdflatex" "xelatex" "lualatex")
@@ -1137,7 +1139,7 @@ A better approach is to use a compiler suit such as `latexmk'."
   :type '(choice (const :tag "BibTeX" "bibtex")
 		 (const :tag "Biber" "biber")
 		 (string :tag "Other process"))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defcustom org-latex-pdf-process
@@ -1197,7 +1199,7 @@ file name as its single argument."
 The logfiles will be removed if `org-latex-remove-logfiles' is
 non-nil."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(repeat (string :tag "Extension")))
 
@@ -1221,7 +1223,7 @@ The regular expressions are used to find possible warnings in the
 log of a latex-run.  These warnings will be reported after
 calling `org-latex-compile'."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(repeat
 	  (cons
@@ -1296,8 +1298,7 @@ For non-floats, see `org-latex--wrap-label'."
 			    main)
 		       (and (eq type 'src-block)
 			    (not (plist-get attr :float))
-			    (memq (plist-get info :latex-listings)
-				  '(nil minted)))))
+			    (null (plist-get info :latex-listings)))))
 	 (short (org-export-get-caption element t))
 	 (caption-from-attr-latex (plist-get attr :caption)))
     (cond
@@ -1582,37 +1583,6 @@ INFO is a plist used as a communication channel."
       (?L . ,(capitalize language))
       (?D . ,(org-export-get-date info)))))
 
-(defun org-latex--make-preamble (info)
-  "Return a formatted LaTeX preamble.
-INFO is a plist used as a communication channel."
-  (let* ((class (plist-get info :latex-class))
-	    (class-options (plist-get info :latex-class-options))
-	    (header (nth 1 (assoc class (plist-get info :latex-classes))))
-	    (document-class-string
-	     (and (stringp header)
-		  (if (not class-options) header
-		    (replace-regexp-in-string
-		     "^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
-		     class-options header t nil 1)))))
-       (if (not document-class-string)
-	   (user-error "Unknown LaTeX class `%s'" class)
-	 (org-latex-guess-polyglossia-language
-	  (org-latex-guess-babel-language
-	   (org-latex-guess-inputenc
-	    (org-element-normalize-string
-	     (org-splice-latex-header
-	      document-class-string
-	      (org-latex--remove-packages
-	       org-latex-default-packages-alist info)
-	      (org-latex--remove-packages
-	       org-latex-packages-alist info)
-	      nil
-	      (mapconcat 'org-element-normalize-string
-			 (list (plist-get info :latex-header)
-			       (plist-get info :latex-header-extra)) ""))))
-	   info)
-	  info))))
-
 (defun org-latex--insert-compiler (info)
   "Insert LaTeX_compiler info into the document.
 INFO is a plist used as a communication channel."
@@ -1622,7 +1592,61 @@ INFO is a plist used as a communication channel."
 	    (format org-latex-compiler-file-string compiler))))
 
 
+;;; Filters
+
+(defun org-latex-matrices-tree-filter (tree _backend info)
+  (org-latex--wrap-latex-matrices tree info))
+
+(defun org-latex-math-block-tree-filter (tree _backend info)
+  (org-latex--wrap-latex-math-block tree info))
+
+(defun org-latex-math-block-options-filter (info _backend)
+  (dolist (prop '(:author :date :title) info)
+    (plist-put info prop
+	       (org-latex--wrap-latex-math-block (plist-get info prop) info))))
+
+(defun org-latex-clean-invalid-line-breaks (data _backend _info)
+  (replace-regexp-in-string
+   "\\(\\end{[A-Za-z0-9*]+}\\|^\\)[ \t]*\\\\\\\\[ \t]*$" "\\1"
+   data))
+
+
 ;;; Template
+
+;;;###autoload
+(defun org-latex-make-preamble (info &optional template snippet?)
+  "Return a formatted LaTeX preamble.
+INFO is a plist used as a communication channel.  Optional
+argument TEMPLATE, when non-nil, is the header template string,
+as expected by `org-splice-latex-header'.  When SNIPPET? is
+non-nil, only includes packages relevant to image generation, as
+specified in `org-latex-default-packages-alist' or
+`org-latex-packages-alist'."
+  (let* ((class (plist-get info :latex-class))
+	 (class-options (plist-get info :latex-class-options))
+	 (header (nth 1 (assoc class (plist-get info :latex-classes))))
+	 (class-template
+	  (or template
+	      (and (stringp header)
+		   (if (not class-options) header
+		     (replace-regexp-in-string
+		      "^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
+		      class-options header t nil 1)))
+	      (user-error "Unknown LaTeX class `%s'" class))))
+    (org-latex-guess-polyglossia-language
+     (org-latex-guess-babel-language
+      (org-latex-guess-inputenc
+       (org-element-normalize-string
+	(org-splice-latex-header
+	 class-template
+	 (org-latex--remove-packages org-latex-default-packages-alist info)
+	 (org-latex--remove-packages org-latex-packages-alist info)
+	 snippet?
+	 (mapconcat #'org-element-normalize-string
+		    (list (plist-get info :latex-header)
+			  (plist-get info :latex-header-extra)) ""))))
+      info)
+     info)))
 
 (defun org-latex-template (contents info)
   "Return complete document string after LaTeX conversion.
@@ -1637,7 +1661,7 @@ holding export options."
      ;; LaTeX compiler.
      (org-latex--insert-compiler info)
      ;; Document class and packages.
-     (org-latex--make-preamble info)
+     (org-latex-make-preamble info)
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)
@@ -2000,7 +2024,7 @@ holding contextual information."
 		    (concat headline-label pre-blanks contents))))))))
 
 (defun org-latex-format-headline-default-function
-    (todo _todo-type priority text tags info)
+    (todo _todo-type priority text tags _info)
   "Default format function for a headline.
 See `org-latex-format-headline-function' for details."
   (concat
@@ -2009,8 +2033,7 @@ See `org-latex-format-headline-function' for details."
    text
    (and tags
 	(format "\\hfill{}\\textsc{%s}"
-		(mapconcat (lambda (tag) (org-latex-plain-text tag info))
-			   tags ":")))))
+		(mapconcat #'org-latex--protect-text tags ":")))))
 
 
 ;;;; Horizontal Rule
@@ -2029,8 +2052,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
        "\n")
      (org-latex--wrap-label
       horizontal-rule
-      (format "\\rule{%s}{%s}"
-	      (or (plist-get attr :width) "\\linewidth")
+      (format "\\noindent\\rule{%s}{%s}"
+	      (or (plist-get attr :width) "\\textwidth")
 	      (or (plist-get attr :thickness) "0.5pt"))
       info))))
 
@@ -2092,7 +2115,7 @@ holding contextual information."
 	     todo todo-type priority title tags contents info)))
 
 (defun org-latex-format-inlinetask-default-function
-  (todo _todo-type priority title tags contents info)
+    (todo _todo-type priority title tags contents _info)
   "Default format function for a inlinetasks.
 See `org-latex-format-inlinetask-function' for details."
   (let ((full-title
@@ -2101,9 +2124,7 @@ See `org-latex-format-inlinetask-function' for details."
 		 title
 		 (when tags
 		   (format "\\hfill{}\\textsc{:%s:}"
-			   (mapconcat
-			    (lambda (tag) (org-latex-plain-text tag info))
-			    tags ":"))))))
+			   (mapconcat #'org-latex--protect-text tags ":"))))))
     (concat "\\begin{center}\n"
 	    "\\fbox{\n"
 	    "\\begin{minipage}[c]{.6\\textwidth}\n"
@@ -2686,8 +2707,6 @@ channel."
 	    (t "\\[\n%s\\]"))
 	  contents))
 
-(defun org-latex-matrices-tree-filter (tree _backend info)
-  (org-latex--wrap-latex-matrices tree info))
 
 ;;;; Pseudo Object: LaTeX Math Block
 
@@ -2744,14 +2763,6 @@ containing export options.  Modify DATA by side-effect and return it."
       info nil '(subscript superscript latex-math-block) t)
     ;; Return updated DATA.
     data))
-
-(defun org-latex-math-block-tree-filter (tree _backend info)
-  (org-latex--wrap-latex-math-block tree info))
-
-(defun org-latex-math-block-options-filter (info _backend)
-  (dolist (prop '(:author :date :title) info)
-    (plist-put info prop
-	       (org-latex--wrap-latex-math-block (plist-get info prop) info))))
 
 (defun org-latex-math-block (_math-block contents _info)
   "Transcode a MATH-BLOCK object from Org to LaTeX.
@@ -2866,13 +2877,19 @@ contextual information."
 	       (float-env
 		(cond
 		 ((string= "multicolumn" float)
-		  (format "\\begin{listing*}\n%s%%s\n%s\\end{listing*}"
+		  (format "\\begin{listing*}[%s]\n%s%%s\n%s\\end{listing*}"
+			  (plist-get info :latex-default-figure-position)
 			  (if caption-above-p caption-str "")
 			  (if caption-above-p "" caption-str)))
 		 (caption
-		  (concat (if caption-above-p caption-str "")
-			  "%s"
-			  (if caption-above-p "" (concat "\n" caption-str))))
+		  (format "\\begin{listing}[%s]\n%s%%s\n%s\\end{listing}"
+			  (plist-get info :latex-default-figure-position)
+			  (if caption-above-p caption-str "")
+			  (if caption-above-p "" caption-str)))
+		 ((string= "t" float)
+		  (concat (format "\\begin{listing}[%s]\n"
+				  (plist-get info :latex-default-figure-position))
+			  "%s\n\\end{listing}"))
 		 (t "%s")))
 	       (options (plist-get info :latex-minted-options))
 	       (body
@@ -3086,10 +3103,12 @@ contextual information."
 		  ;; table, insert their definition just after it.
 		  (org-latex--delayed-footnotes-definitions table info)))))))
 
-(defun org-latex--align-string (table info)
+(defun org-latex--align-string (table info &optional math?)
   "Return an appropriate LaTeX alignment string.
 TABLE is the considered table.  INFO is a plist used as
-a communication channel."
+a communication channel.  When optional argument MATH? is
+non-nil, TABLE is meant to be a matrix, where all cells are
+centered."
   (or (org-export-read-attribute :attr_latex table :align)
       (let (align)
 	;; Extract column groups and alignment from first (non-rule)
@@ -3105,10 +3124,11 @@ a communication channel."
 	      ;; Check left border for the first cell only.
 	      (when (and (memq 'left borders) (not align))
 		(push "|" align))
-	      (push (cl-case (org-export-table-cell-alignment cell info)
-		      (left "l")
-		      (right "r")
-		      (center "c"))
+	      (push (if math? "c"	;center cells in matrices
+		      (cl-case (org-export-table-cell-alignment cell info)
+			(left "l")
+			(right "r")
+			(center "c")))
 		    align)
 	      (when (memq 'right borders) (push "|" align))))
 	  info)
@@ -3294,11 +3314,8 @@ This function assumes TABLE has `org' as its `:type' property and
      (plist-get attr :math-prefix)
      ;; Environment.  Also treat special cases.
      (cond ((member env '("array" "tabular"))
-	    ;; Make sure cells are always centered while preserving
-	    ;; vertical separators.
-	    (let ((align (replace-regexp-in-string
-			  "[lr]" "c" (org-latex--align-string table info))))
-	      (format "\\begin{%s}{%s}\n%s\\end{%s}" env align contents env)))
+	    (format "\\begin{%s}{%s}\n%s\\end{%s}"
+		    env (org-latex--align-string table info t) contents env))
 	   ((assoc env org-latex-table-matrix-macros)
 	    (format "\\%s%s{\n%s}"
 		    env
@@ -3675,9 +3692,13 @@ Return output file name."
   ;; in working directory and then moved to publishing directory.
   (org-publish-attachment
    plist
-   (org-latex-compile
-    (org-publish-org-to
-     'latex filename ".tex" plist (file-name-directory filename)))
+   ;; Default directory could be anywhere when this function is
+   ;; called.  We ensure it is set to source file directory during
+   ;; compilation so as to not break links to external documents.
+   (let ((default-directory (file-name-directory filename)))
+     (org-latex-compile
+      (org-publish-org-to
+       'latex filename ".tex" plist (file-name-directory filename))))
    pub-dir))
 
 

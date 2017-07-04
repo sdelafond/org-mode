@@ -2,8 +2,9 @@ org-mode (9.0.9+dfsg-1) UNRELEASED; urgency=medium
 
   [ Nicholas D Steeves ]
   * debian/watch: Switch to version 4, and add repacksuffix=+dfsg
-  * Switch to copyright-format 1.0, because this allows Files-Excluded
-    to strip non-dfsg source
+    - When repacking dfsg-free source, repack with xz
+  * Switch to copyright-format 1.0, because this allows using
+    Files-Excluded to strip non-dfsg source
   * New upstream version 9.0.9+dfsg
 
  -- Nicholas D Steeves <nsteeves@gmail.com>  Mon, 03 Jul 2017 20:46:18 -0400

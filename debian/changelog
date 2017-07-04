@@ -1,4 +1,4 @@
-org-mode (9.0.9+dfsg-1) UNRELEASED; urgency=medium
+org-mode (9.0.9+dfsg-1) unstable; urgency=medium
 
   [ Nicholas D Steeves ]
   * debian/watch: Switch to version 4, and add repacksuffix=+dfsg
@@ -7,7 +7,7 @@ org-mode (9.0.9+dfsg-1) UNRELEASED; urgency=medium
     Files-Excluded to strip non-dfsg source
   * New upstream version 9.0.9+dfsg
 
- -- Nicholas D Steeves <nsteeves@gmail.com>  Mon, 03 Jul 2017 20:46:18 -0400
+ -- Sebastien Delafond <seb@debian.org>  Tue, 04 Jul 2017 17:46:50 +0200
 
 org-mode (9.0.3-2) unstable; urgency=medium
 

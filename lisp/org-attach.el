@@ -1,6 +1,6 @@
 ;;; org-attach.el --- Manage file attachments to Org tasks -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2008-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
 ;; Author: John Wiegley <johnw@newartisans.com>
 ;; Keywords: org data task
@@ -59,7 +59,7 @@ where the Org file lives."
 This is only done if the Org file is in a git repository."
   :group 'org-attach
   :type 'boolean
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defcustom org-attach-git-annex-cutoff (* 32 1024)
@@ -131,7 +131,7 @@ lns   create a symbol link.  Note that this is not supported
   "Non-nil means attachments are deleted upon archiving a subtree.
 When set to `query', ask the user instead."
   :group 'org-attach
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Never delete attachments" nil)
@@ -143,7 +143,7 @@ When set to `query', ask the user instead."
 If \\='ask, prompt using `y-or-n-p'.  If t, always get.  If nil, never get."
   :group 'org-attach
   :package-version '(Org . "9")
-  :version "25.2"
+  :version "26.1"
   :type '(choice
 	  (const :tag "confirm with `y-or-n-p'" ask)
 	  (const :tag "always get from annex if necessary" t)
@@ -441,7 +441,8 @@ The attachment is created as an Emacs buffer."
     (unless (file-exists-p file)
       (error "No such attachment: %s" file))
     (delete-file file)
-    (org-attach-commit)))
+    (when org-attach-commit
+      (org-attach-commit))))
 
 (defun org-attach-delete-all (&optional force)
   "Delete all attachments from the current task.
@@ -457,14 +458,16 @@ A safer way is to open the directory in dired and delete from there."
 		 (y-or-n-p "Are you sure you want to remove all attachments of this entry? ")))
       (shell-command (format "rm -fr %s" attach-dir))
       (message "Attachment directory removed")
-      (org-attach-commit)
+      (when org-attach-commit
+        (org-attach-commit))
       (org-attach-untag))))
 
 (defun org-attach-sync ()
   "Synchronize the current tasks with its attachments.
 This can be used after files have been added externally."
   (interactive)
-  (org-attach-commit)
+  (when org-attach-commit
+    (org-attach-commit))
   (when (and org-attach-file-list-property (not org-attach-inherited))
     (org-entry-delete (point) org-attach-file-list-property))
   (let ((attach-dir (org-attach-dir)))

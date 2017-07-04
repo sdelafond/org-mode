@@ -1,6 +1,6 @@
 ;; ox-man.el --- Man Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2011-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;;      Luis R Anaya <papoanaya aroba hot mail punto com>
@@ -590,7 +590,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-man-line-break (_line-break _contents _info)
   "Transcode a LINE-BREAK object from Org to Man.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  ".br\n")
+  "\n.br\n")
 
 
 ;;; Link

@@ -1,6 +1,6 @@
 ;;; ox-beamer.el --- Beamer Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2007-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2007-2017 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;;         Nicolas Goaziou <n.goaziou AT gmail DOT com>
@@ -140,7 +140,7 @@ You might want to put e.g. \"allowframebreaks=0.9\" here."
 The format string should have at most one \"%s\"-expression,
 which is replaced with the subtitle."
   :group 'org-export-beamer
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(string :tag "Format string"))
 
@@ -797,7 +797,7 @@ holding export options."
      ;; LaTeX compiler
      (org-latex--insert-compiler info)
      ;; Document class and packages.
-     (org-latex--make-preamble info)
+     (org-latex-make-preamble info)
      ;; Insert themes.
      (let ((format-theme
 	    (function
@@ -1122,9 +1122,13 @@ Return output file name."
   ;; working directory and then moved to publishing directory.
   (org-publish-attachment
    plist
-   (org-latex-compile
-    (org-publish-org-to
-     'beamer filename ".tex" plist (file-name-directory filename)))
+   ;; Default directory could be anywhere when this function is
+   ;; called.  We ensure it is set to source file directory during
+   ;; compilation so as to not break links to external documents.
+   (let ((default-directory (file-name-directory filename)))
+     (org-latex-compile
+      (org-publish-org-to
+       'beamer filename ".tex" plist (file-name-directory filename))))
    pub-dir))
 
 

@@ -1,6 +1,6 @@
 ;;; org-colview.el --- Column View in Org            -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -85,7 +85,7 @@ output.
 Types defined in this variable take precedence over those defined
 in `org-columns-summary-types-default', which see."
   :group 'org-properties
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type '(alist :key-type (string :tag "       Label")
 		:value-type (function :tag "Summarize")))
@@ -223,21 +223,24 @@ See `org-columns-summary-types' for details.")
 
 (defun org-columns--displayed-value (spec value)
   "Return displayed value for specification SPEC in current entry.
-
 SPEC is a column format specification as stored in
 `org-columns-current-fmt-compiled'.  VALUE is the real value to
 display, as a string."
-  (cond
-   ((and (functionp org-columns-modify-value-for-display-function)
-	 (funcall org-columns-modify-value-for-display-function
-		  (nth 1 spec)
-		  value)))
-   ((equal (car spec) "ITEM")
-    (concat (make-string (1- (org-current-level))
-			 (if org-hide-leading-stars ?\s ?*))
-	    "* "
-	    (org-columns-compact-links value)))
-   (value)))
+  (or (and (functionp org-columns-modify-value-for-display-function)
+	   (funcall org-columns-modify-value-for-display-function
+		    (nth 1 spec)	;column name
+		    value))
+      (pcase spec
+	(`("ITEM" . ,_)
+	 (concat (make-string (1- (org-current-level))
+			      (if org-hide-leading-stars ?\s ?*))
+		 "* "
+		 (org-columns-compact-links value)))
+	(`(,_ ,_ ,_ ,_ nil) value)
+	;; If PRINTF is set, assume we are displaying a number and
+	;; obey to the format string.
+	(`(,_ ,_ ,_ ,_ ,printf) (format printf (string-to-number value)))
+	(_ (error "Invalid column specification format: %S" spec)))))
 
 (defun org-columns--collect-values (&optional compiled-fmt)
   "Collect values for columns on the current line.
@@ -778,6 +781,7 @@ view for the whole buffer unconditionally.
 When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive "P")
   (org-columns-remove-overlays)
+  (when global (goto-char (point-min)))
   (move-marker org-columns-begin-marker (point))
   (org-columns-goto-top-level)
   ;; Initialize `org-columns-current-fmt' and
@@ -1081,7 +1085,7 @@ as days/hours/minutes/seconds."
    ((string-match-p org-ts-regexp s)
     (floor
      (- org-columns--time
-	(float-time (apply #'encode-time (org-parse-time-string s))))))
+	(float-time (apply #'encode-time (org-parse-time-string s nil t))))))
    ;; Match own output for computations in upper levels.
    ((string-match "\\([0-9]+\\)d \\([0-9]+\\)h \\([0-9]+\\)m \\([0-9]+\\)s" s)
     (+ (* 86400 (string-to-number (match-string 1 s)))
@@ -1165,8 +1169,13 @@ properties drawers."
 	       ;; When PROPERTY exists in current node, even if empty,
 	       ;; but its value doesn't match the one computed, use
 	       ;; the latter instead.
-	       (when (and update value (not (equal value summary)))
-		 (org-entry-put (point) property summary)))
+	       ;;
+	       ;; Ignore leading or trailing white spaces that might
+	       ;; have been introduced in summary, since those are not
+	       ;; significant in properties value.
+	       (let ((new-value (org-trim summary)))
+		 (when (and update value (not (equal value new-value)))
+		   (org-entry-put (point) property new-value))))
 	     ;; Add current to current level accumulator.
 	     (when (or summary value-set)
 	       (push (or summary value) (aref lvals level)))
@@ -1223,14 +1232,17 @@ When PRINTF is non-nil, use it to format the result."
 (defun org-columns--summary-checkbox-count (check-boxes _)
   "Summarize CHECK-BOXES with a check-box cookie."
   (format "[%d/%d]"
-	  (cl-count "[X]" check-boxes :test #'equal)
+	  (cl-count-if (lambda (b) (or (equal b "[X]")
+				  (string-match-p "\\[\\([1-9]\\)/\\1\\]" b)))
+		       check-boxes)
 	  (length check-boxes)))
 
 (defun org-columns--summary-checkbox-percent (check-boxes _)
   "Summarize CHECK-BOXES with a check-box percent."
   (format "[%d%%]"
-	  (round (* 100.0 (cl-count "[X]" check-boxes :test #'equal))
-		 (float (length check-boxes)))))
+	  (round (* 100.0 (cl-count-if (lambda (b) (member b '("[X]" "[100%]")))
+				       check-boxes))
+		 (length check-boxes))))
 
 (defun org-columns--summary-min (values printf)
   "Compute the minimum of VALUES.
@@ -1288,7 +1300,7 @@ When PRINTF is non-nil, use it to format the result."
    (/ (apply #'+ (mapcar #'org-columns--age-to-seconds ages))
       (float (length ages)))))
 
-(defun org-columns--summary-estimate (estimates printf)
+(defun org-columns--summary-estimate (estimates _)
   "Combine a list of estimates, using mean and variance.
 The mean and variance of the result will be the sum of the means
 and variances (respectively) of the individual estimates."
@@ -1303,8 +1315,8 @@ and variances (respectively) of the individual estimates."
 	(`(,value) (cl-incf mean value))))
     (let ((sd (sqrt var)))
       (format "%s-%s"
-	      (format (or printf "%.0f") (- mean sd))
-	      (format (or printf "%.0f") (+ mean sd))))))
+	      (format "%.0f" (- mean sd))
+	      (format "%.0f" (+ mean sd))))))
 
 
 
@@ -1531,8 +1543,7 @@ PARAMS is a property list of parameters:
       (goto-char (point-min))
       (let (cache)
 	(while (not (eobp))
-	  (let ((m (or (org-get-at-bol 'org-hd-marker)
-		       (org-get-at-bol 'org-marker))))
+	  (let ((m (org-get-at-bol 'org-hd-marker)))
 	    (when m
 	      (push (cons (line-beginning-position)
 			  ;; `org-columns-current-fmt-compiled' is
@@ -1566,56 +1577,60 @@ This will add overlays to the date lines, to show the summary for each day."
 		   (if (member property '("CLOCKSUM" "CLOCKSUM_T"))
 		       (list property title width ":" nil)
 		     spec))))
-	      org-columns-current-fmt-compiled))
-	entries)
+	      org-columns-current-fmt-compiled)))
     ;; Ensure there's at least one summation column.
     (when (cl-some (lambda (spec) (nth 3 spec)) fmt)
       (goto-char (point-max))
-      (while (not (bobp))
-	(when (or (get-text-property (point) 'org-date-line)
-		  (eq (get-text-property (point) 'face)
-		      'org-agenda-structure))
-	  ;; OK, this is a date line that should be used.
-	  (let (rest)
-	    (dolist (c cache (setq cache rest))
-	      (if (> (car c) (point))
-		  (push c entries)
-		(push c rest))))
-	  ;; Now ENTRIES contains entries below the current one.
-	  ;; CACHE is the rest.  Compute the summaries for the
-	  ;; properties we want, set nil properties for the rest.
-	  (when (setq entries (mapcar 'cdr entries))
-	    (org-columns--display-here
-	     (mapcar
-	      (lambda (spec)
-		(pcase spec
-		  (`("ITEM" . ,_)
-		   ;; Replace ITEM with current date.  Preserve
-		   ;; properties for fontification.
-		   (let ((date (buffer-substring
-				(line-beginning-position)
-				(line-end-position))))
-		     (list spec date date)))
-		  (`(,_ ,_ ,_ nil ,_) (list spec "" ""))
-		  (`(,_ ,_ ,_ ,operator ,printf)
-		   (let* ((summarize (org-columns--summarize operator))
-			  (values
-			   ;; Use real values for summary, not those
-			   ;; prepared for display.
-			   (delq nil
-				 (mapcar
-				  (lambda (e)
-				    (org-string-nw-p (nth 1 (assoc spec e))))
-				  entries)))
-			  (final (if values (funcall summarize values printf)
-				   "")))
-		     (unless (equal final "")
-		       (put-text-property 0 (length final) 'face 'bold final))
-		     (list spec final final)))))
-	      fmt)
-	     'dateline)
-	    (setq-local org-agenda-columns-active t)))
-	(forward-line -1)))))
+      (catch :complete
+	(while t
+	  (when (or (get-text-property (point) 'org-date-line)
+		    (eq (get-text-property (point) 'face)
+			'org-agenda-structure))
+	    ;; OK, this is a date line that should be used.
+	    (let (entries)
+	      (let (rest)
+		(dolist (c cache)
+		  (if (> (car c) (point))
+		      (push c entries)
+		    (push c rest)))
+		(setq cache rest))
+	      ;; ENTRIES contains entries below the current one.
+	      ;; CACHE is the rest.  Compute the summaries for the
+	      ;; properties we want, set nil properties for the rest.
+	      (when (setq entries (mapcar #'cdr entries))
+		(org-columns--display-here
+		 (mapcar
+		  (lambda (spec)
+		    (pcase spec
+		      (`("ITEM" . ,_)
+		       ;; Replace ITEM with current date.  Preserve
+		       ;; properties for fontification.
+		       (let ((date (buffer-substring
+				    (line-beginning-position)
+				    (line-end-position))))
+			 (list spec date date)))
+		      (`(,_ ,_ ,_ nil ,_) (list spec "" ""))
+		      (`(,_ ,_ ,_ ,operator ,printf)
+		       (let* ((summarize (org-columns--summarize operator))
+			      (values
+			       ;; Use real values for summary, not
+			       ;; those prepared for display.
+			       (delq nil
+				     (mapcar
+				      (lambda (e) (org-string-nw-p
+					      (nth 1 (assoc spec e))))
+				      entries)))
+			      (final (if values
+					 (funcall summarize values printf)
+				       "")))
+			 (unless (equal final "")
+			   (put-text-property 0 (length final)
+					      'face 'bold final))
+			 (list spec final final)))))
+		  fmt)
+		 'dateline)
+		(setq-local org-agenda-columns-active t))))
+	  (if (bobp) (throw :complete t) (forward-line -1)))))))
 
 (defun org-agenda-colview-compute (fmt)
   "Compute the relevant columns in the contributing source buffers."

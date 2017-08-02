@@ -1,53 +1,10 @@
-#! /usr/bin/make -f
+#!/usr/bin/make -f
 
-DOC_TMP_FILES := doc/org.aux doc/org.cp doc/org.cps doc/org.fn \
-		 doc/org.fns doc/org.ky doc/org.kys \
-	         doc/org.log doc/org.pg doc/org.toc doc/org.tp \
+%:
+	dh $@ --with elpa
 
-DOC_FILES := doc/*pdf
+override_dh_auto_build:
 
-clean:
-	dh_testdir
-	dh_testroot
-	dh_clean
-	rm -f $(DOC_FILES) $(DOC_TMP_FILES)
+override_dh_auto_clean:
 
-build build-indep build-arch:
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs
-	cp lisp/* $(CURDIR)/debian/org-mode/usr/share/emacs/site-lisp/org-mode
-	cp -r etc $(CURDIR)/debian/org-mode/usr/share/emacs/site-lisp/org-mode
-#	cp xemacs/*.el $(CURDIR)/debian/org-mode/usr/share/xemacs/site-lisp/org-mode
-	cp -r contrib $(CURDIR)/debian/org-mode/usr/share/org-mode/
-#	make doc
-	rm -f $(DOC_TMP_FILES)
-	find $(CURDIR)/debian/org-mode/usr/share/org-mode/ -type f -exec chmod 644 "{}" \;
-	find $(CURDIR)/debian/org-mode/usr/share/emacs/site-lisp/org-mode -type f -exec chmod 644 "{}" \;
-	find $(CURDIR)/debian/org-mode/usr/share/org-mode/ -name .DS_Store -exec rm -f "{}" \;
-	find $(CURDIR)/debian/org-mode/usr/share/org-mode/ -name .gitignore -exec rm -f "{}" \;
-
-binary-indep: install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs
-	dh_installdocs
-	dh_link
-	rm -f $(CURDIR)/debian/org-mode/usr/share/doc/org-mode/*texi*
-	dh_installemacsen -v
-	dh_fixperms
-#	dh_installinfo doc/org
-	dh_compress
-	dh_installdeb
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary-arch: build-arch
-
-binary: binary-indep binary-arch
-
-.PHONY: build clean build-indep build-arch binary binary-indep binary-arch
+override_dh_auto_install:

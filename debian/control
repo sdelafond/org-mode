@@ -1,21 +1,24 @@
 Source: org-mode
-Section: misc
+Section: lisp
 Priority: optional
 Maintainer: Sebastien Delafond <seb@debian.org>
-Build-Depends: debhelper (>= 6)
-Build-Depends-Indep: emacs | emacs25 | emacs24 | emacs-snapshot
+Build-Depends: debhelper (>= 10), dh-elpa
 Standards-Version: 3.9.8
 Homepage: http://orgmode.org
 Vcs-Git: https://anonscm.debian.org/git/collab-maint/org-mode.git
 Vcs-Browser: https://anonscm.debian.org/git/collab-maint/org-mode.git
 
-Package: org-mode
+Package: elpa-org
 Architecture: all
-Depends: ${misc:Depends}, emacsen-common (>= 2.0.8), emacs25 | emacs24 | emacs-snapshot
-Conflicts: emacsen-common (<< 2.0.0)
-Recommends: texlive-generic-recommended, texlive-latex-recommended
+Depends: ${elpa:Depends}, ${misc:Depends}
+Recommends: emacs (>= 46.0)
 Suggests: org-mode-doc, ditaa, texlive-latex-extra, texlive-fonts-recommended
-Description: keep notes, maintain ToDo lists, and do project planning in emacs
+Enhances: emacs,
+ emacs24,
+ emacs25
+Breaks: org-mode (<< 9.0.9+dfsg-2)
+Provides: org-mode, elpa-org-plus-contrib
+Description: Keep notes, maintain ToDo lists, and do project planning in emacs
  Org-mode is a mode for keeping notes, maintaining ToDo lists, and
  doing project planning with a fast and effective plain-text system.
  .
@@ -30,3 +33,10 @@ Description: keep notes, maintain ToDo lists, and do project planning in emacs
  BBDB entries, and any files related to the projects. For printing and
  sharing of notes, an Org-mode file can be exported as a structured
  ASCII file, HTML, and LaTeX.
+
+Package: org-mode
+Architecture: all
+Depends: ${misc:Depends}, elpa-org
+Description: Transition Package, org-mode to elpa-org
+ The Org emacs addon has been elpafied. This dummy package
+ helps ease transition from org-mode to elpa-org.

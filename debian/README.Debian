@@ -1,7 +1,12 @@
+Include contrib by default, and make sure the binary package provides
+elp-org-contrib-plus so we don't break emacs dependencies.
+
+ -- Sebastien Delafond <seb@untangle.com>, Wed,  2 Aug 2017 15:20:10 -0400
+
 The org version shipped in the emacs package is quite ancient, and
 many of the functionalities described all over the net are simply not
 available on it. The org-mode package instead ships an
-always-up-to-date version, that when installed it automatically takes
+always-up-to-date version, that when installed automatically takes
 precedence over the version shipped in emacs.
 
  -- Sebastien Delafond <seb@debian.org>, Tue, 25 Aug 2015 12:38:06 +0200

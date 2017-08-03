@@ -1,3 +1,9 @@
+org-mode (9.0.9+dfsg-3) unstable; urgency=medium
+
+  * Switch to team maintenance: Debian Emacs addons team <pkg-emacsen-addons@lists.alioth.debian.org>
+
+ -- Sebastien Delafond <seb@debian.org>  Thu, 03 Aug 2017 11:26:08 -0400
+
 org-mode (9.0.9+dfsg-2) unstable; urgency=medium
 
   * Switch to dh-elpa (Closes: #829288, #610699)

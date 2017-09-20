@@ -8,3 +8,9 @@ override_dh_auto_build:
 override_dh_auto_clean:
 
 override_dh_auto_install:
+
+# don't install bundled version of htmlize.el; depend on elpa-htmlize
+# instead.  See Debian Policy 4.13
+override_dh_elpa:
+	dh_elpa
+	rm debian/elpa-org/usr/share/emacs/site-lisp/elpa-src/org-*/htmlize.el

@@ -1,3 +1,10 @@
+org-mode (9.1.2+dfsg-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream version 9.1.2+dfsg
+
+ -- Sebastien Delafond <seb@debian.org>  Sat, 07 Oct 2017 10:23:08 +0200
+
 org-mode (9.0.9+dfsg-4) unstable; urgency=low
 
   * Team upload.

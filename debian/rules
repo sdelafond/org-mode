@@ -9,6 +9,9 @@ override_dh_auto_clean:
 
 override_dh_auto_install:
 
-override_dh_elpa:                                  
+override_dh_elpa_test:
+	rm testing/lisp/test-ob-fortran.el
+
+override_dh_elpa:
 	dh_elpa
 	rm debian/elpa-org/usr/share/emacs/site-lisp/elpa-src/org-*/ob-sclang.el

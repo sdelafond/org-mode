@@ -395,35 +395,35 @@ the daily/weekly agenda, see `org-agenda-skip-function'.")
 				   (choice
 				    :tag "Condition type"
 				    (list :tag "Regexp matches" :inline t
-					  (const :format "" 'regexp)
+					  (const :format "" regexp)
 					  (regexp))
 				    (list :tag "Regexp does not match" :inline t
-					  (const :format "" 'notregexp)
+					  (const :format "" notregexp)
 					  (regexp))
 				    (list :tag "TODO state is" :inline t
-					  (const 'todo)
+					  (const todo)
 					  (choice
-					   (const :tag "Any not-done state" 'todo)
-					   (const :tag "Any done state" 'done)
-					   (const :tag "Any state" 'any)
+					   (const :tag "Any not-done state" todo)
+					   (const :tag "Any done state" done)
+					   (const :tag "Any state" any)
 					   (list :tag "Keyword list"
 						 (const :format "" quote)
 						 (repeat (string :tag "Keyword")))))
 				    (list :tag "TODO state is not" :inline t
-					  (const 'nottodo)
+					  (const nottodo)
 					  (choice
-					   (const :tag "Any not-done state" 'todo)
-					   (const :tag "Any done state" 'done)
-					   (const :tag "Any state" 'any)
+					   (const :tag "Any not-done state" todo)
+					   (const :tag "Any done state" done)
+					   (const :tag "Any state" any)
 					   (list :tag "Keyword list"
 						 (const :format "" quote)
 						 (repeat (string :tag "Keyword")))))
-				    (const :tag "scheduled" 'scheduled)
-				    (const :tag "not scheduled" 'notscheduled)
-				    (const :tag "deadline" 'deadline)
-				    (const :tag "no deadline" 'notdeadline)
-				    (const :tag "timestamp" 'timestamp)
-				    (const :tag "no timestamp" 'nottimestamp))))))
+				    (const :tag "scheduled" scheduled)
+				    (const :tag "not scheduled" notscheduled)
+				    (const :tag "deadline" deadline)
+				    (const :tag "no deadline" notdeadline)
+				    (const :tag "timestamp" timestamp)
+				    (const :tag "no timestamp" nottimestamp))))))
 		   (list :tag "Non-standard skipping condition"
 			 :value (org-agenda-skip-function)
 			 (const org-agenda-skip-function)
@@ -606,8 +606,8 @@ subtree to see if any of the subtasks have project status.
 See also the variable `org-tags-match-list-sublevels' which applies
 to projects matched by this search as well.
 
-After defining this variable, you may use `\\[org-agenda-list-stuck-projects]'
-\(bound to `C-c a #') to produce the list."
+After defining this variable, you may use `org-agenda-list-stuck-projects'
+\(bound to `\\[org-agenda] #') to produce the list."
   :group 'org-agenda-custom-commands
   :type '(list
 	  (string :tag "Tags/TODO match to identify a project")
@@ -2520,7 +2520,7 @@ The following commands are available:
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
      ["Get Captured and Flagged" org-mobile-pull t]
-     ["Find FLAGGED Tasks" (org-agenda nil "?") :active t :keys "C-c a ?"]
+     ["Find FLAGGED Tasks" (org-agenda nil "?") :active t :keys "\\[org-agenda] ?"]
      ["Show note / unflag" org-agenda-show-the-flagging-note t]
      "--"
      ["Setup" (progn (require 'org-mobile) (customize-group 'org-mobile)) t])

@@ -1,3 +1,10 @@
+org-mode (9.1.5+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 9.1.5+dfsg
+  * Bump-up Standards-Version
+
+ -- Sebastien Delafond <seb@debian.org>  Wed, 03 Jan 2018 11:41:37 +0100
+
 org-mode (9.1.2+dfsg-2) sid; urgency=medium
 
   * Remove ob-sclang.el for now (Closes: #878017)

@@ -31,6 +31,209 @@ Files: contrib/scripts/org2hpda
 Copyright: 2007-2013 Christian Egli <christian.egli@alumni.ethz.ch>
 License: GPL-3+
 
+Files: testing/lisp/test-ob-awk.el
+Copyright: 2010-2014 Sergey Litvinov
+License: GPL-3+
+
+Files: testing/lisp/test-ob-C.el
+Copyright: 2010-2014 Sergey Litvinov, Thierry Banel
+License: GPL-3+
+
+Files: testing/lisp/test-ob.el
+Copyright: 2010-2015 Eric Schulte
+License: GPL-3+
+
+Files: testing/lisp/test-ob-emacs-lisp.el
+Copyright: 2012-2017 Free Software Foundation, Inc.
+License: GPL-3+
+
+Files: testing/lisp/test-ob-exp.el
+Copyright: 2010-2015 Eric Schulte
+License: GPL-3+
+
+Files: testing/lisp/test-ob-fortran.el
+Copyright: 2010-2014 Sergey Litvinov
+License: GPL-3+
+
+Files: testing/lisp/test-ob-header-arg-defaults.el
+Copyright: 2013, 2014 Achim Gratz
+License: GPL-3+
+
+Files: testing/lisp/test-ob-lilypond.el
+Copyright: 2010-2014 Martyn Jago
+License: GPL-3+
+
+Files: testing/lisp/test-ob-lob.el
+Copyright: 2010-2015 Eric Schulte
+License: GPL-3+
+
+Files: testing/lisp/test-ob-lua.el
+Copyright: 2016 Thibault Marin
+License: GPL-3+
+
+Files: testing/lisp/test-ob-maxima.el
+Copyright: 2010-2014 Sergey Litvinov
+License: GPL-3+
+
+Files: testing/lisp/test-ob-octave.el
+Copyright: 2010-2014 Sergey Litvinov
+License: GPL-3+
+
+Files: testing/lisp/test-ob-perl.el
+Copyright: 2013, 2014 Achim Gratz
+License: GPL-3+
+
+Files: testing/lisp/test-ob-plantuml.el
+Copyright: 2016 Thibault Marin
+License: GPL-3+
+
+Files: testing/lisp/test-ob-python.el
+Copyright: 2011-2014 Eric Schulte
+License: GPL-3+
+
+Files: testing/lisp/test-ob-R.el
+Copyright: 2011-2014 Eric Schulte
+License: GPL-3+
+
+Files: testing/lisp/test-ob-ruby.el
+Copyright: 2013-2015 Oleh Krehel
+License: GPL-3+
+
+Files: testing/lisp/test-ob-scheme.el
+Copyright: 2017  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-ob-sed.el
+Copyright: 2015 Bjarte Johansen
+License: GPL-3+
+
+Files: testing/lisp/test-ob-shell.el
+Copyright: 2010-2014 Eric Schulte
+License: GPL-3+
+
+Files: testing/lisp/test-ob-sqlite.el
+Copyright: 2017  Eduardo Bellani
+License: GPL-3+
+
+Files: testing/lisp/test-ob-table.el
+Copyright: 2011-2014 Eric Schulte
+License: GPL-3+
+
+Files: testing/lisp/test-ob-tangle.el
+Copyright: 2010-2016 Eric Schulte
+License: GPL-3+
+
+Files: testing/lisp/test-ob-vala.el
+Copyright: 2017 Christian Garbs
+License: GPL-3+
+
+Files: testing/lisp/test-org-agenda.el
+Copyright: 2017 Marco Wahl
+License: GPL-3+
+
+Files: testing/lisp/test-org-attach-annex.el
+Copyright: 2016 Erik Hetzner
+License: GPL-3+
+
+Files: testing/lisp/test-org-capture.el
+Copyright: 2015, 2017  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-clock.el
+Copyright: 2012, 2014, 2015  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-colview.el
+Copyright: 2016  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-datetree.el
+Copyright: 2015  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-duration.el
+Copyright: 2017  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org.el
+Copyright:  David Maus
+License: GPL-3+
+
+Files: testing/lisp/test-org-element.el
+Copyright: 2012-2015  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-feed.el
+Copyright: 2016  Michael Brand
+License: GPL-3+
+
+Files: testing/lisp/test-org-footnote.el
+Copyright: 2012-2015  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-info.el
+Copyright: 2017  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-inlinetask.el
+Copyright:  Marco Wahl
+License: GPL-3+
+
+Files: testing/lisp/test-org-lint.el
+Copyright: 2016  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-list.el
+Copyright: 2012, 2013, 2014  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-macro.el
+Copyright: 2013, 2014  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-macs.el
+Copyright: 2017  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-org-pcomplete.el
+Copyright: 2015-2016  Alexey Lebedeff
+License: GPL-3+
+
+Files: testing/lisp/test-org-protocol.el
+Copyright:  Sacha Chua
+License: GPL-3+
+
+Files: testing/lisp/test-org-src.el
+Copyright: 2012-2015  Le Wang
+License: GPL-3+
+
+Files: testing/lisp/test-org-table.el
+Copyright:  David Maus
+License: GPL-3+
+
+Files: testing/lisp/test-org-timer.el
+Copyright: 2014-2015  Kyle Meyer
+License: GPL-3+
+
+Files: testing/lisp/test-ox.el
+Copyright: 2012-2016  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-ox-publish.el
+Copyright: 2016  Nicolas Goaziou
+License: GPL-3+
+
+Files: testing/lisp/test-property-inheritance.el
+Copyright: 2011-2014 Eric Schulte
+License: GPL-3+
+
+Files: testing/org-batch-test-init.el
+License: GPL-3+
+
+Files: testing/org-test.el
+Copyright: 2010-2015 Sebastian Rose, Eric Schulte
+License: GPL-3+
+
 Files: debian/*
 Copyright: 2008-2017 Sebastien Delafond <seb@debian.org>
            2017 Nicholas D Steeves <nsteeves@gmail.com>

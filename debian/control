@@ -13,7 +13,7 @@ Package: elpa-org
 Architecture: all
 Depends: ${elpa:Depends}, ${misc:Depends}, elpa-htmlize
 Recommends: emacs (>= 46.0)
-Suggests: org-mode-doc, ditaa, texlive-latex-extra, texlive-fonts-recommended
+Suggests: org-mode-doc, ditaa, texlive-latex-extra, texlive-fonts-recommended, texinfo
 Enhances: emacs,
  emacs24,
  emacs25

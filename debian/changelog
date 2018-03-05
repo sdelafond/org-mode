@@ -1,3 +1,12 @@
+org-mode (9.1.7+dfsg-1) unstable; urgency=medium
+
+  * Document copyright attributions for testing/
+  * Remove obsolete README.Debian entry about contrib/ not being enabled by default (Closes: #887333)
+  * Add texinfo to Suggests: (Closes: #880626)
+  * New upstream version 9.1.7+dfsg
+
+ -- Sebastien Delafond <seb@debian.org>  Mon, 05 Mar 2018 09:18:06 +0100
+
 org-mode (9.1.6+dfsg-1) unstable; urgency=medium
 
   * New upstream version 9.1.6+dfsg

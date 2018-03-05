@@ -1,6 +1,6 @@
 ;;; ox-html.el --- HTML Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
+;; Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;      Jambunathan K <kjambunathan at gmail dot com>
@@ -234,7 +234,7 @@ property on the headline itself.")
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2017 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -465,7 +465,7 @@ customize `org-html-head-include-default-style'.")
 ;;;; Handle infojs
 
 (defvar org-html-infojs-opts-table
-  '((path PATH "http://orgmode.org/org-info.js")
+  '((path PATH "https://orgmode.org/org-info.js")
     (view VIEW "info")
     (toc TOC :with-toc)
     (ftoc FIXED_TOC "0")
@@ -524,7 +524,7 @@ means to use the maximum value consistent with other options."
  * @licstart  The following is the entire license notice for the
  *  JavaScript code in %SCRIPT_PATH.
  *
- * Copyright (C) 2012-2017 Free Software Foundation, Inc.
+ * Copyright (C) 2012-2018 Free Software Foundation, Inc.
  *
  *
  * The JavaScript code in this tag is free software: you can
@@ -553,7 +553,7 @@ means to use the maximum value consistent with other options."
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2017 Free Software Foundation, Inc.
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -1324,7 +1324,7 @@ like that: \"%%\"."
   :type 'string)
 
 (defcustom org-html-creator-string
-  (format "<a href=\"https://www.gnu.org/software/emacs/\">Emacs</a> %s (<a href=\"http://orgmode.org\">Org</a> mode %s)"
+  (format "<a href=\"https://www.gnu.org/software/emacs/\">Emacs</a> %s (<a href=\"https://orgmode.org\">Org</a> mode %s)"
 	  emacs-version
 	  (if (fboundp 'org-version) (org-version) "unknown version"))
   "Information about the creator of the HTML document.
@@ -1452,13 +1452,13 @@ done, timestamp, timestamp-kwd, tag, target.
 For example, a valid value would be:
 
    <style type=\"text/css\">
-    <![CDATA[
-       p { font-weight: normal; color: gray; }
-       h1 { color: black; }
+    /*<![CDATA[*/
+      p { font-weight: normal; color: gray; }
+      h1 { color: black; }
       .title { text-align: center; }
       .todo, .timestamp-kwd { color: red; }
       .done { color: green; }
-    ]]>
+    /*]]>*/
    </style>
 
 If you want to refer to an external style, use something like
@@ -2697,7 +2697,7 @@ holding contextual information."
 
 (defun org-html-format-inlinetask-default-function
   (todo todo-type priority text tags contents info)
-  "Default format function for a inlinetasks.
+  "Default format function for inlinetasks.
 See `org-html-format-inlinetask-function' for details."
   (format "<div class=\"inlinetask\">\n<b>%s</b>%s\n%s</div>"
 	  (org-html-format-headline-default-function

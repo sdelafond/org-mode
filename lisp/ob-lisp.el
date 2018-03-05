@@ -1,12 +1,12 @@
 ;;; ob-lisp.el --- Babel Functions for Common Lisp   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2009-2017 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
 ;; Authors: Joel Boehland
 ;;	 Eric Schulte
 ;;	 David T. O'Toole <dto@gnu.org>
 ;; Keywords: literate programming, reproducible research
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 

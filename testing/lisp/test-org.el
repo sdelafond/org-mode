@@ -5731,6 +5731,15 @@ Paragraph<point>"
      (org-match-sparse-tree nil "Lev_1")
      (search-forward "H4")
      (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text
+       "#+TAGS: [ Lev_1 : Lev_2 ]\n
+#+TAGS: [ Lev_2 : Lev_3 ]\n
+#+TAGS: { Lev_3 : Lev_4 }\n
+* H\n** H1 :Lev_1:\n** H2 :Lev_2:\n** H3 :Lev_3:\n** H4 :Lev_4:"
+     (org-match-sparse-tree nil "Lev_1+Lev_3")
+     (search-forward "H4")
+     (org-invisible-p2)))
   ;; Match regular expressions in tags
   (should-not
    (org-test-with-temp-text
@@ -5952,6 +5961,88 @@ Paragraph<point>"
 	  (org-test-with-temp-text
 	   "* T<point>est :foo:bar:"
 	   (org-get-tags-at)))))
+
+(ert-deftest test-org/set-tags ()
+  "Test `org-set-tags' specifications."
+  ;; Tags set via fast-tag-selection should be visible afterwards
+  (should
+   (let ((org-tag-alist '(("NEXT" . ?n)))
+	 (org-fast-tag-selection-single-key t))
+     (cl-letf (((symbol-function 'read-char-exclusive) (lambda () ?n))
+	       ((symbol-function 'window-width) (lambda (&rest args) 100)))
+       (org-test-with-temp-text "<point>* Headline\nAnd its content\n* And another headline\n\nWith some content"
+	 ;; Show only headlines
+	 (org-content)
+	 ;; Set NEXT tag on current entry
+	 (org-set-tags nil nil)
+	 ;; Move point to that NEXT tag
+	 (search-forward "NEXT") (backward-word)
+	 ;; And it should be visible (i.e. no overlays)
+	 (not (overlays-at (point))))))))
+
+(ert-deftest test-org/set-tags-to ()
+  "Test `org-set-tags-to' specifications."
+  ;; Throw an error on invalid data.
+  (should-error
+   (org-test-with-temp-text "* H"
+     (org-set-tags-to 'foo)))
+  ;; `nil', an empty, and a blank string remove all tags.
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (org-set-tags-to nil)
+	    (buffer-string))))
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (org-set-tags-to "")
+	    (buffer-string))))
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (org-set-tags-to " ")
+	    (buffer-string))))
+  ;; If there's nothing to remove, just bail out.
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* H"
+	    (org-set-tags-to nil)
+	    (buffer-string))))
+  (should
+   (equal "* "
+	  (org-test-with-temp-text "* "
+	    (org-set-tags-to nil)
+	    (buffer-string))))
+  ;; If DATA is a tag string, set current tags to it, even if it means
+  ;; replacing old tags.
+  (should
+   (equal "* H :tag0:"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (org-set-tags-to ":tag0:")
+	    (buffer-string))))
+  (should
+   (equal "* H :tag0:"
+	  (org-test-with-temp-text "* H"
+	    (org-set-tags-to ":tag0:")
+	    (buffer-string))))
+  ;; If DATA is a list, set tags to this list, even if it means
+  ;; replacing old tags.
+  (should
+   (equal "* H :tag0:"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (org-set-tags-to '("tag0"))
+	    (buffer-string))))
+  (should
+   (equal "* H :tag0:"
+	  (org-test-with-temp-text "* H"
+	    (org-set-tags-to '("tag0"))
+	    (buffer-string))))
+  ;; Special case: handle empty headlines.
+  (should
+   (equal "* :tag0:"
+	  (org-test-with-temp-text "* "
+	    (org-set-tags-to '("tag0"))
+	    (buffer-string)))))
 
 
 ;;; TODO keywords
@@ -6572,24 +6663,6 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
      (org-hide-block-toggle-maybe)))
   (should-not
    (org-test-with-temp-text "Paragraph" (org-hide-block-toggle-maybe))))
-
-(ert-deftest test-org/set-tags ()
-  "Test `org-set-tags' specifications."
-  ;; Tags set via fast-tag-selection should be visible afterwards
-  (should
-   (let ((org-tag-alist '(("NEXT" . ?n)))
-	 (org-fast-tag-selection-single-key t))
-     (cl-letf (((symbol-function 'read-char-exclusive) (lambda () ?n))
-	       ((symbol-function 'window-width) (lambda (&rest args) 100)))
-       (org-test-with-temp-text "<point>* Headline\nAnd its content\n* And another headline\n\nWith some content"
-	 ;; Show only headlines
-	 (org-content)
-	 ;; Set NEXT tag on current entry
-	 (org-set-tags nil nil)
-	 ;; Move point to that NEXT tag
-	 (search-forward "NEXT") (backward-word)
-	 ;; And it should be visible (i.e. no overlays)
-	 (not (overlays-at (point))))))))
 
 (ert-deftest test-org/show-set-visibility ()
   "Test `org-show-set-visibility' specifications."

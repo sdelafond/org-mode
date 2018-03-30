@@ -1,5 +1,5 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Source: http://orgmode.org/
+Source: https://orgmode.org/
 Upstream-Contact: Carsten Dominik <carsten@orgmode.org>
 Files-Excluded: doc contrib/orgmanual.org contrib/scripts/ditaa.jar
 

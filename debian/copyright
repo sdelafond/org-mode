@@ -227,9 +227,6 @@ Files: testing/lisp/test-property-inheritance.el
 Copyright: 2011-2014 Eric Schulte
 License: GPL-3+
 
-Files: testing/org-batch-test-init.el
-License: GPL-3+
-
 Files: testing/org-test.el
 Copyright: 2010-2015 Sebastian Rose, Eric Schulte
 License: GPL-3+

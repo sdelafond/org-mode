@@ -296,8 +296,8 @@ used to limit the exported source code blocks by language.
 
 ;;;***
 
-;;;### (autoloads nil "org-agenda" "org-agenda.el" (23225 38749 946676
-;;;;;;  576000))
+;;;### (autoloads nil "org-agenda" "org-agenda.el" (23242 44291 113798
+;;;;;;  677000))
 ;;; Generated autoloads from org-agenda.el
 
 (autoload 'org-toggle-sticky-agenda "org-agenda" "\
@@ -654,8 +654,8 @@ Extract anniversaries from BBDB for display in the agenda.
 
 ;;;***
 
-;;;### (autoloads nil "org-capture" "org-capture.el" (23219 1809
-;;;;;;  192084 303000))
+;;;### (autoloads nil "org-capture" "org-capture.el" (23260 10064
+;;;;;;  718296 919000))
 ;;; Generated autoloads from org-capture.el
 
 (autoload 'org-capture-string "org-capture" "\
@@ -1315,8 +1315,8 @@ line directly before or after the table.
 
 ;;;***
 
-;;;### (autoloads nil "org-table" "org-table.el" (23205 49922 832961
-;;;;;;  711000))
+;;;### (autoloads nil "org-table" "org-table.el" (23251 59267 34174
+;;;;;;  368000))
 ;;; Generated autoloads from org-table.el
 
 (autoload 'org-table-create-with-table\.el "org-table" "\
@@ -2081,8 +2081,8 @@ using three `C-u' prefix arguments.
 
 ;;;***
 
-;;;### (autoloads nil "org-version" "org-version.el" (23225 38781
-;;;;;;  730289 272000))
+;;;### (autoloads nil "org-version" "org-version.el" (23260 10988
+;;;;;;  479014 603000))
 ;;; Generated autoloads from org-version.el
 
 (autoload 'org-release "org-version" "\
@@ -2102,7 +2102,7 @@ The location of ODT styles.")
 
 ;;;***
 
-;;;### (autoloads nil "org" "org.el" (23225 38749 954676 479000))
+;;;### (autoloads nil "org" "org.el" (23258 61986 839105 223000))
 ;;; Generated autoloads from org.el
 
 (autoload 'org-babel-do-load-languages "org" "\
@@ -2856,7 +2856,7 @@ Return output file name.
 
 ;;;***
 
-;;;### (autoloads nil "ox-md" "ox-md.el" (23122 46211 585086 74000))
+;;;### (autoloads nil "ox-md" "ox-md.el" (23260 10064 718296 919000))
 ;;; Generated autoloads from ox-md.el
 
 (autoload 'org-md-export-as-markdown "ox-md" "\

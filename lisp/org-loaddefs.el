@@ -296,8 +296,8 @@ used to limit the exported source code blocks by language.
 
 ;;;***
 
-;;;### (autoloads nil "org-agenda" "org-agenda.el" (23242 44291 113798
-;;;;;;  677000))
+;;;### (autoloads nil "org-agenda" "org-agenda.el" (23266 31379 196273
+;;;;;;  327000))
 ;;; Generated autoloads from org-agenda.el
 
 (autoload 'org-toggle-sticky-agenda "org-agenda" "\
@@ -631,8 +631,8 @@ This command is set with the variable `org-archive-default-command'.
 
 ;;;***
 
-;;;### (autoloads nil "org-attach" "org-attach.el" (23122 46211 553086
-;;;;;;  484000))
+;;;### (autoloads nil "org-attach" "org-attach.el" (23266 24793 820849
+;;;;;;  631000))
 ;;; Generated autoloads from org-attach.el
 
 (autoload 'org-attach "org-attach" "\
@@ -2081,8 +2081,8 @@ using three `C-u' prefix arguments.
 
 ;;;***
 
-;;;### (autoloads nil "org-version" "org-version.el" (23260 10988
-;;;;;;  479014 603000))
+;;;### (autoloads nil "org-version" "org-version.el" (23279 54756
+;;;;;;  270759 539000))
 ;;; Generated autoloads from org-version.el
 
 (autoload 'org-release "org-version" "\
@@ -2102,7 +2102,7 @@ The location of ODT styles.")
 
 ;;;***
 
-;;;### (autoloads nil "org" "org.el" (23258 61986 839105 223000))
+;;;### (autoloads nil "org" "org.el" (23279 38659 992378 536000))
 ;;; Generated autoloads from org.el
 
 (autoload 'org-babel-do-load-languages "org" "\
@@ -2561,8 +2561,8 @@ Return output file name.
 
 ;;;***
 
-;;;### (autoloads nil "ox-html" "ox-html.el" (23195 45027 417189
-;;;;;;  767000))
+;;;### (autoloads nil "ox-html" "ox-html.el" (23278 38207 656449
+;;;;;;  914000))
 ;;; Generated autoloads from ox-html.el
 
 (put 'org-html-head-include-default-style 'safe-local-variable 'booleanp)

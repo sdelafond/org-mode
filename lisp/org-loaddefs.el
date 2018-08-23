@@ -1010,8 +1010,8 @@ with \"H:MM:SS\" format, return `h:mm:ss'.  Otherwise, return
 
 ;;;***
 
-;;;### (autoloads nil "org-element" "org-element.el" (23205 49922
-;;;;;;  832961 711000))
+;;;### (autoloads nil "org-element" "org-element.el" (23422 27911
+;;;;;;  118415 356000))
 ;;; Generated autoloads from org-element.el
 
 (autoload 'org-element-update-syntax "org-element" "\
@@ -2081,8 +2081,8 @@ using three `C-u' prefix arguments.
 
 ;;;***
 
-;;;### (autoloads nil "org-version" "org-version.el" (23279 54756
-;;;;;;  270759 539000))
+;;;### (autoloads nil "org-version" "org-version.el" (23422 27944
+;;;;;;  254147 655000))
 ;;; Generated autoloads from org-version.el
 
 (autoload 'org-release "org-version" "\
@@ -2102,7 +2102,7 @@ The location of ODT styles.")
 
 ;;;***
 
-;;;### (autoloads nil "org" "org.el" (23279 38659 992378 536000))
+;;;### (autoloads nil "org" "org.el" (23422 27911 122415 323000))
 ;;; Generated autoloads from org.el
 
 (autoload 'org-babel-do-load-languages "org" "\
@@ -2928,7 +2928,7 @@ Return output file name.
 
 ;;;***
 
-;;;### (autoloads nil "ox-odt" "ox-odt.el" (23195 45027 421189 719000))
+;;;### (autoloads nil "ox-odt" "ox-odt.el" (23422 27911 126415 291000))
 ;;; Generated autoloads from ox-odt.el
 
 (put 'org-odt-preferred-output-format 'safe-local-variable 'stringp)

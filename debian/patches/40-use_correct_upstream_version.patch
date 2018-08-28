@@ -1,0 +1,25 @@
+Description: Use correct upstream version
+ Upstream doesn't consistently update the declared version and we're not
+ consistently updating debian/org-pkg.el.  This patch will require the
+ Debian maintainer to verify that the upstream version is correct when
+ updating to a new upstream release.
+ .
+ The correct upstream version is required to resolve org-mode-doc
+ Bug #725408 "org-mode 8 info does not show up in info index"
+Author: Nicholas D Steeves <nsteeves@gmail.com>
+
+---
+Forwarded: no
+Last-Update: 2018-08-28
+
+--- org-mode-9.1.14+dfsg.orig/lisp/org.el
++++ org-mode-9.1.14+dfsg/lisp/org.el
+@@ -7,7 +7,7 @@
+ ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
+ ;; Keywords: outlines, hypermedia, calendar, wp
+ ;; Homepage: https://orgmode.org
+-;; Version: 9.1.13
++;; Version: 9.1.14
+ ;;
+ ;; This file is part of GNU Emacs.
+ ;;

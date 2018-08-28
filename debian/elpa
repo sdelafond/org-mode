@@ -1,3 +1,2 @@
 lisp/*.el
 contrib/lisp/*.el
-debian/org-pkg.el

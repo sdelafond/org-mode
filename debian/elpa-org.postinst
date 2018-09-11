@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+# fix 908508
+dir_9_1_11="/usr/share/emacs/site-lisp/elpa/org-9.1.11"
+if [ -d "$dir_9_1_11" ] ; then
+  rm -fr "$dir_9_1_11"
+fi

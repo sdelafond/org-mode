@@ -1,17 +1,8 @@
-org-mode (9.1.14+dfsg-2) UNRELEASED; urgency=medium
+org-mode (9.1.14+dfsg-2) unstable; urgency=medium
 
-  * Fix wrongly declared ELPA version (9.1.11 was declared)
-    - The correct ELPA version is required to resolve org-mode-doc
-      Bug #725408 "org-mode 8 info does not show up in info index".
-    - Remove debian/org-pkg.el.
-    - Add patch 40-use_correct_upstream_version.patch.  Upstream doesn't
-      consistently update the declared version and we're not consistently
-      updating debian/org-pkg.el.  This patch will require the Debian
-      maintainer to verify that the ELPA version is correct when updating
-      to a new upstream release.
-    - debian/elpa: Drop debian/org-pkg.el.
+  * Set version to 9.1.14 in org-pkg.el
 
- -- Nicholas D Steeves <nsteeves@gmail.com>  Mon, 27 Aug 2018 23:03:11 -0400
+ -- Sebastien Delafond <seb@debian.org>  Sun, 09 Sep 2018 11:04:38 +0200
 
 org-mode (9.1.14+dfsg-1) unstable; urgency=medium
 

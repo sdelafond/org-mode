@@ -1,3 +1,10 @@
+org-mode (9.2.2+dfsg-2) unstable; urgency=medium
+
+  * d/elpa: manually list contrib files, so we can exclude problematic
+    ones (Closes: #925592)
+
+ -- Sebastien Delafond <seb@debian.org>  Wed, 27 Mar 2019 11:33:41 +0100
+
 org-mode (9.2.2+dfsg-1) unstable; urgency=medium
 
   * New upstream version 9.2.2+dfsg

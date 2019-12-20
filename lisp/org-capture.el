@@ -51,10 +51,16 @@
 (require 'org)
 
 (declare-function org-at-encrypted-entry-p "org-crypt" ())
+(declare-function org-at-table-p "org-table" (&optional table-type))
 (declare-function org-clock-update-mode-line "org-clock" (&optional refresh))
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 (declare-function org-decrypt-entry "org-crypt" ())
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-lineage "org-element" (datum &optional types with-self))
+(declare-function org-element-property "org-element" (property element))
 (declare-function org-encrypt-entry "org-crypt" ())
+(declare-function org-insert-link "ol" (&optional complete-file link-location default-description))
+(declare-function org-link-make-string "ol" (link &optional description))
 (declare-function org-table-analyze "org-table" ())
 (declare-function org-table-current-dline "org-table" ())
 (declare-function org-table-fix-formulas "org-table" (key replace &optional limit delta remove))
@@ -64,9 +70,12 @@
 (defvar org-end-time-was-given)
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
+(defvar org-store-link-plist)
 (defvar org-table-border-regexp)
 (defvar org-table-current-begin-pos)
+(defvar org-table-dataline-regexp)
 (defvar org-table-fix-formulas-confirm)
+(defvar org-table-hline-regexp)
 (defvar org-table-hlines)
 
 (defvar org-capture-clock-was-started nil
@@ -152,7 +161,7 @@ type         The type of entry.  Valid types are:
                            first plain list at the target
                            location.
                checkitem   a checkbox item.  This differs from the
-                           plain list item only is so far as it uses a
+                           plain list item only in so far as it uses a
                            different default template.
                table-line  a new line in the first table at target location.
                plain       text to be inserted as it is.
@@ -654,10 +663,9 @@ of the day at point (if any) or the current HH:MM time."
 			 :annotation annotation
 			 :initial initial
 			 :return-to-wconf (current-window-configuration)
-			 :default-time
-			 (or org-overriding-default-time
-			     (org-current-time)))
-	(org-capture-set-target-location)
+			 :default-time (or org-overriding-default-time
+					   (org-current-time)))
+	(org-capture-set-target-location (and (equal goto 0) 'here))
 	(condition-case error
 	    (org-capture-put :template (org-capture-fill-template))
 	  ((error quit)
@@ -665,31 +673,28 @@ of the day at point (if any) or the current HH:MM time."
 	   (error "Capture abort: %s" (error-message-string error))))
 
 	(setq org-capture-clock-keep (org-capture-get :clock-keep))
-	(if (equal goto 0)
-	    ;;insert at point
-	    (org-capture-insert-template-here)
-	  (condition-case error
-	      (org-capture-place-template
-	       (eq (car (org-capture-get :target)) 'function))
-	    ((error quit)
-	     (when (and (buffer-base-buffer (current-buffer))
-			(string-prefix-p "CAPTURE-" (buffer-name)))
-	       (kill-buffer (current-buffer)))
-	     (set-window-configuration (org-capture-get :return-to-wconf))
-	     (error "Capture template `%s': %s"
-		    (org-capture-get :key)
-		    (error-message-string error))))
-	  (when (and (derived-mode-p 'org-mode) (org-capture-get :clock-in))
-	    (condition-case nil
-		(progn
-		  (when (org-clock-is-active)
-		    (org-capture-put :interrupted-clock
-				     (copy-marker org-clock-marker)))
-		  (org-clock-in)
-		  (setq-local org-capture-clock-was-started t))
-	      (error "Could not start the clock in this capture buffer")))
-	  (when (org-capture-get :immediate-finish)
-	    (org-capture-finalize)))))))))
+	(condition-case error
+	    (org-capture-place-template
+	     (eq (car (org-capture-get :target)) 'function))
+	  ((error quit)
+	   (when (and (buffer-base-buffer (current-buffer))
+		      (string-prefix-p "CAPTURE-" (buffer-name)))
+	     (kill-buffer (current-buffer)))
+	   (set-window-configuration (org-capture-get :return-to-wconf))
+	   (error "Capture template `%s': %s"
+		  (org-capture-get :key)
+		  (error-message-string error))))
+	(when (and (derived-mode-p 'org-mode) (org-capture-get :clock-in))
+	  (condition-case nil
+	      (progn
+		(when (org-clock-is-active)
+		  (org-capture-put :interrupted-clock
+				   (copy-marker org-clock-marker)))
+		(org-clock-in)
+		(setq-local org-capture-clock-was-started t))
+	    (error "Could not start the clock in this capture buffer")))
+	(when (org-capture-get :immediate-finish)
+	  (org-capture-finalize))))))))
 
 (defun org-capture-get-template ()
   "Get the template from a file or a function if necessary."
@@ -918,6 +923,8 @@ Store them in the capture property list."
   (let ((target-entry-p t))
     (save-excursion
       (pcase (or target (org-capture-get :target))
+	(`here
+	 (org-capture-put :exact-position (point) :insert-here t))
 	(`(file ,path)
 	 (set-buffer (org-capture-target-buffer path))
 	 (org-capture-put-target-region-and-position)
@@ -1011,9 +1018,9 @@ Store them in the capture property list."
 			      (not (= (time-to-days prompt-time) (org-today))))
 			 ;; Use 00:00 when no time is given for another
 			 ;; date than today?
-			 (apply #'encode-time
-				(append `(0 0 ,org-extend-today-until)
-					(cl-cdddr (decode-time prompt-time)))))
+			 (apply #'encode-time 0 0
+				org-extend-today-until
+				(cl-cdddr (decode-time prompt-time))))
 			((string-match "\\([^ ]+\\)--?[^ ]+[ ]+\\(.*\\)"
 				       org-read-date-final-answer)
 			 ;; Replace any time range by its start.
@@ -1115,11 +1122,14 @@ may have been stored before."
   "Place the template as a new Org entry."
   (let ((template (org-capture-get :template))
 	(reversed? (org-capture-get :prepend))
+	(exact-position (org-capture-get :exact-position))
+	(insert-here? (org-capture-get :insert-here))
 	(level 1))
     (org-capture-verify-tree template)
-    (when (org-capture-get :exact-position)
-      (goto-char (org-capture-get :exact-position)))
+    (when exact-position (goto-char exact-position))
     (cond
+     ;; Force insertion at point.
+     ((org-capture-get :insert-here) nil)
      ;; Insert as a child of the current entry.
      ((org-capture-get :target-entry-p)
       (setq level (org-get-valid-level
@@ -1136,7 +1146,9 @@ may have been stored before."
       (unless (bolp) (insert "\n"))
       (org-capture-empty-lines-before)
       (let ((beg (point)))
-	(org-paste-subtree level template 'for-yank)
+	(save-restriction
+	  (when insert-here? (narrow-to-region beg beg))
+	  (org-paste-subtree level template 'for-yank))
 	(org-capture-position-for-last-stored beg)
 	(let ((end (if (org-at-heading-p) (line-end-position 0) (point))))
 	  (org-capture-empty-lines-after)
@@ -1163,10 +1175,11 @@ may have been stored before."
 		 (cond ((org-capture-get :exact-position)
 			;; User gave a specific position.  Start
 			;; looking for lists from here.
-			(cons (save-excursion
-				(goto-char (org-capture-get :exact-position))
-				(line-beginning-position))
-			      (org-entry-end-position)))
+			(org-with-point-at (org-capture-get :exact-position)
+			  (cons (line-beginning-position)
+				(if (org-capture-get :insert-here)
+				    (line-beginning-position)
+				  (org-entry-end-position)))))
 		       ((org-capture-get :target-entry-p)
 			;; At a heading, limit search to its body.
 			(cons (line-beginning-position 2)
@@ -1187,8 +1200,15 @@ may have been stored before."
 					       item))
 	      (throw :found t)))
 	  ;; No list found.  Move to the location when to insert
-	  ;; template.
-	  (goto-char (if prepend? beg end)))))
+	  ;; template.  Skip planning info and properties drawers, if
+	  ;; any.
+	  (goto-char (cond ((org-capture-get :insert-here) beg)
+			   ((not prepend?) end)
+			   ((org-before-first-heading-p) beg)
+			   (t (max (save-excursion
+				     (org-end-of-meta-data)
+				     (point))
+				   beg)))))))
     ;; Insert template.
     (let ((origin (point)))
       (unless (bolp) (insert "\n"))
@@ -1265,8 +1285,10 @@ may have been stored before."
 	beg end)
     (cond
      ((org-capture-get :exact-position)
-      (setq beg (org-capture-get :exact-position))
-      (setq end (save-excursion (outline-next-heading) (point))))
+      (org-with-point-at (org-capture-get :exact-position)
+	(setq beg (line-beginning-position))
+	(setq end (if (org-capture-get :insert-here) beg
+		    (org-entry-end-position)))))
      ((not (org-capture-get :target-entry-p))
       ;; Table is not necessarily under a heading.  Find first table
       ;; in the buffer.
@@ -1292,10 +1314,11 @@ may have been stored before."
       (goto-char end)
       (unless (bolp) (insert "\n"))
       (let ((origin (point)))
-	(insert "|   |\n|----|\n")
+	(insert "|   |\n|---|\n")
 	(narrow-to-region origin (point))))
     ;; In the current table, find the appropriate location for TEXT.
     (cond
+     ((org-capture-get :insert-here) nil)
      ((and table-line-pos
 	   (string-match "\\(I+\\)\\([-+][0-9]+\\)" table-line-pos))
       (goto-char (point-min))
@@ -1441,44 +1464,6 @@ Point will remain at the first line after the inserted text."
 
 (defvar org-clock-marker) ; Defined in org.el
 
-(defun org-capture-insert-template-here ()
-  "Insert the capture template at point."
-  (let* ((template (org-capture-get :template))
-	 (type  (org-capture-get :type))
-	 beg end pp)
-    (unless (bolp) (insert "\n"))
-    (setq beg (point))
-    (cond
-     ((and (eq type 'entry) (derived-mode-p 'org-mode))
-      (org-capture-verify-tree (org-capture-get :template))
-      (org-paste-subtree nil template t))
-     ((and (memq type '(item checkitem))
-	   (derived-mode-p 'org-mode)
-	   (save-excursion (skip-chars-backward " \t\n")
-			   (setq pp (point))
-			   (org-in-item-p)))
-      (goto-char pp)
-      (org-insert-item)
-      (skip-chars-backward " ")
-      (skip-chars-backward "-+*0123456789).")
-      (delete-region (point) (point-at-eol))
-      (setq beg (point))
-      (org-remove-indentation template)
-      (insert template)
-      (org-capture-empty-lines-after)
-      (goto-char beg)
-      (org-list-repair)
-      (org-end-of-item))
-     (t
-      (insert template)
-      (org-capture-empty-lines-after)
-      (skip-chars-forward " \t\n")
-      (unless (eobp) (beginning-of-line))))
-    (setq end (point))
-    (goto-char beg)
-    (when (re-search-forward "%\\?" end t)
-      (replace-match ""))))
-
 (defun org-capture-set-plist (entry)
   "Initialize the property list from the template definition."
   (setq org-capture-plist (copy-sequence (nthcdr 5 entry)))
@@ -1586,14 +1571,14 @@ The template may still contain \"%?\" for cursor positioning."
 		  (replace-match "[[\\1][%^{Link description}]]" nil nil v-a)
 		v-a))
 	 (v-l (if (and v-a (string-match l-re v-a))
-		  (replace-match "\\1" nil nil v-a)
+		  (replace-match "[[\\1]]" nil nil v-a)
 		v-a))
 	 (v-n user-full-name)
 	 (v-k (if (marker-buffer org-clock-marker)
 		  (org-no-properties org-clock-heading)
 		""))
 	 (v-K (if (marker-buffer org-clock-marker)
-		  (org-make-link-string
+		  (org-link-make-string
 		   (format "%s::*%s"
 			   (buffer-file-name (marker-buffer org-clock-marker))
 			   v-k)
@@ -1608,10 +1593,8 @@ The template may still contain \"%?\" for cursor positioning."
 		      (org-get-x-clipboard 'CLIPBOARD)
 		      (org-get-x-clipboard 'SECONDARY)
 		      v-c))))
-
     (setq org-store-link-plist (plist-put org-store-link-plist :annotation v-a))
     (setq org-store-link-plist (plist-put org-store-link-plist :initial v-i))
-
     (unless template
       (setq template "")
       (message "no template") (ding)
@@ -1623,7 +1606,6 @@ The template may still contain \"%?\" for cursor positioning."
       (setq mark-active nil)
       (insert template)
       (goto-char (point-min))
-
       ;; %[] insert contents of a file.
       (save-excursion
 	(while (re-search-forward "%\\[\\(.+\\)\\]" nil t)
@@ -1640,12 +1622,10 @@ The template may still contain \"%?\" for cursor positioning."
 		 (insert (format "%%![couldn not insert %s: %s]"
 				 filename
 				 error))))))))
-
       ;; Mark %() embedded elisp for later evaluation.
       (org-capture-expand-embedded-elisp 'mark)
-
       ;; Expand non-interactive templates.
-      (let ((regexp "%\\(:[-a-za-z]+\\|<\\([^>\n]+\\)>\\|[aAcfFikKlntTuUx]\\)"))
+      (let ((regexp "%\\(:[-A-Za-z]+\\|<\\([^>\n]+\\)>\\|[aAcfFikKlntTuUx]\\)"))
 	(save-excursion
 	  (while (re-search-forward regexp nil t)
 	    ;; `org-capture-escaped-%' may modify buffer and cripple
@@ -1693,10 +1673,8 @@ The template may still contain \"%?\" for cursor positioning."
 		       ;; Escape sensitive characters.
 		       (replace-regexp-in-string "[\\\"]" "\\\\\\&" replacement)
 		     replacement))))))))
-
       ;; Expand %() embedded Elisp.  Limit to Sexp originally marked.
       (org-capture-expand-embedded-elisp)
-
       ;; Expand interactive templates.  This is the last step so that
       ;; template is mostly expanded when prompting happens.  Turn on
       ;; Org mode and set local variables.  This is to support
@@ -1814,7 +1792,6 @@ The template may still contain \"%?\" for cursor positioning."
 		    (_
 		     (error "Unknown template placeholder: \"%%^%s\""
 			    key))))))))
-
 	;; Replace %n escapes with nth %^{...} string.
 	(setq strings (nreverse strings))
 	(save-excursion
@@ -1823,16 +1800,16 @@ The template may still contain \"%?\" for cursor positioning."
 	      (replace-match
 	       (nth (1- (string-to-number (match-string 1))) strings)
 	       nil t)))))
-
       ;; Make sure there are no empty lines before the text, and that
       ;; it ends with a newline character or it is empty.
       (skip-chars-forward " \t\n")
       (delete-region (point-min) (line-beginning-position))
       (goto-char (point-max))
       (skip-chars-backward " \t\n")
-      (delete-region (point) (point-max))
-      (unless (bobp) (insert "\n"))
-
+      (if (bobp) (delete-region (point) (line-end-position))
+	(end-of-line)
+	(delete-region (point) (point-max))
+	(insert "\n"))
       ;; Return the expanded template and kill the capture buffer.
       (untabify (point-min) (point-max))
       (set-buffer-modified-p nil)

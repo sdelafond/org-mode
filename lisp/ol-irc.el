@@ -1,4 +1,4 @@
-;;; org-irc.el --- Store Links to IRC Sessions -*- lexical-binding: t; -*-
+;;; ol-irc.el --- Links to IRC Sessions              -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2008-2019 Free Software Foundation, Inc.
 ;;
@@ -48,7 +48,7 @@
 
 ;;; Code:
 
-(require 'org)
+(require 'ol)
 
 (declare-function erc-buffer-filter "erc" (predicate &optional proc))
 (declare-function erc-channel-p "erc" (channel))
@@ -155,7 +155,7 @@ the session itself."
 	     (parsed-line (org-irc-erc-get-line-from-log erc-line)))
 	(if (erc-logging-enabled nil)
 	    (progn
-	      (org-store-link-props
+	      (org-link-store-props
 	       :type "file"
 	       :description (concat "'" (org-irc-ellipsify-description
 					 (cadr parsed-line) 20)
@@ -168,7 +168,7 @@ the session itself."
 	   (link (org-irc-parse-link link-text)))
       (if link-text
 	  (progn
-	    (org-store-link-props
+	    (org-link-store-props
 	     :type "irc"
 	     :link (concat "irc:/" link-text)
 	     :description (concat "irc session `" link-text "'")
@@ -260,10 +260,10 @@ FORMAT."
       (`md (format "[%s](irc:%s)" desc link))
       (_ nil))))
 
-(provide 'org-irc)
+(provide 'ol-irc)
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"
 ;; End:
 
-;;; org-irc.el ends here
+;;; ol-irc.el ends here

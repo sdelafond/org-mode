@@ -1,4 +1,4 @@
-;;; org-notmuch.el --- Support for links to notmuch messages from within Org-mode
+;;; org-notmuch.el --- Links to notmuch messages
 
 ;; Copyright (C) 2010-2014  Matthieu Lemerre
 
@@ -23,9 +23,9 @@
 
 ;;; Commentary:
 
-;; This file implements links to notmuch messages and "searchs". A
+;; This file implements links to notmuch messages and "searches". A
 ;; search is a query to be performed by notmuch; it is the equivalent
-;; to folders in other mail clients. Similarly, mails are refered to
+;; to folders in other mail clients. Similarly, mails are referred to
 ;; by a query, so both a link can refer to several mails.
 
 ;; Links have one the following form
@@ -35,10 +35,11 @@
 ;; The first form open the queries in notmuch-show mode, whereas the
 ;; second link open it in notmuch-search mode. Note that queries are
 ;; performed at the time the link is opened, and the result may be
-;; different from whet the link was stored.
+;; different from when the link was stored.
 
 ;;; Code:
 
+(require 'ol)
 (require 'org)
 
 ;; customisable notmuch open functions
@@ -55,12 +56,13 @@ Should accept a notmuch search string as the sole argument."
 (defcustom org-notmuch-search-open-function
   'org-notmuch-search-follow-link
   "Function used to follow notmuch-search links.
-
 Should accept a notmuch search string as the sole argument."
   :group 'org-notmuch
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'function)
+
+(make-obsolete-variable 'org-notmuch-search-open-function nil "9.3")
 
 
 
@@ -71,7 +73,7 @@ Should accept a notmuch search string as the sole argument."
 
 (defun org-notmuch-store-link ()
   "Store a link to a notmuch search or message."
-  (when (eq major-mode 'notmuch-show-mode)
+  (when (memq major-mode '(notmuch-show-mode notmuch-tree-mode))
     (let* ((message-id (notmuch-show-get-message-id t))
 	   (subject (notmuch-show-get-subject))
 	   (to (notmuch-show-get-to))
@@ -115,7 +117,7 @@ Can link to more than one message, if so all matching messages are shown."
 (defun org-notmuch-search-open (path)
   "Follow a notmuch message link specified by PATH."
   (message "%s" path)
-  (funcall org-notmuch-search-open-function path))
+  (org-notmuch-search-follow-link path))
 
 (defun org-notmuch-search-follow-link (search)
   "Follow a notmuch link by displaying SEARCH in notmuch-search mode."
@@ -124,11 +126,30 @@ Can link to more than one message, if so all matching messages are shown."
 
 
 
+(org-link-set-parameters "notmuch-tree"
+			 :follow #'org-notmuch-tree-open
+			 :store #'org-notmuch-tree-store-link)
+
+(defun org-notmuch-tree-store-link ()
+  "Store a link to a notmuch search or message."
+  (when (eq major-mode 'notmuch-tree-mode)
+    (let ((link (concat "notmuch-tree:" (notmuch-tree-get-query)))
+	  (desc (concat "Notmuch tree: " (notmuch-tree-get-query))))
+      (org-store-link-props :type "notmuch-tree"
+			    :link link
+			    :description desc)
+      link)))
+
+(defun org-notmuch-tree-open (path)
+  "Follow a notmuch message link specified by PATH."
+  (message "%s" path)
+  (org-notmuch-tree-follow-link path))
+
 (defun org-notmuch-tree-follow-link (search)
   "Follow a notmuch link by displaying SEARCH in notmuch-tree mode."
   (require 'notmuch)
   (notmuch-tree search))
 
-(provide 'org-notmuch)
+(provide 'ol-notmuch)
 
-;;; org-notmuch.el ends here
+;;; ol-notmuch.el ends here

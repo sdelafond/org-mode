@@ -73,6 +73,7 @@
 
 (require 'cl-lib)
 (require 'ob-exp)
+(require 'ol)
 (require 'org-element)
 (require 'org-macro)
 (require 'tabulated-list)
@@ -804,7 +805,7 @@ also be set with the OPTIONS keyword, e.g. \"timestamp:nil\"."
   :safe #'booleanp)
 
 (defcustom org-export-with-timestamps t
-  "Non nil means allow timestamps in export.
+  "Non-nil means allow timestamps in export.
 
 It can be set to any of the following values:
   t          export all timestamps.
@@ -2919,56 +2920,47 @@ returned by the function."
       '(entity bold italic latex-environment latex-fragment strike-through
 	       subscript superscript underline)
     (lambda (datum)
-      (let ((new
-	     (cl-case (org-element-type datum)
-	       ;; ... entities...
-	       (entity
-		(and (not (plist-get info :with-entities))
-		     (list (concat
-			    (org-export-expand datum nil)
-			    (make-string
-			     (or (org-element-property :post-blank datum) 0)
-			     ?\s)))))
-	       ;; ... emphasis...
-	       ((bold italic strike-through underline)
-		(and (not (plist-get info :with-emphasize))
-		     (let ((marker (cl-case (org-element-type datum)
-				     (bold "*")
-				     (italic "/")
-				     (strike-through "+")
-				     (underline "_"))))
-		       (append
-			(list marker)
-			(org-element-contents datum)
-			(list (concat
-			       marker
-			       (make-string
-				(or (org-element-property :post-blank datum)
-				    0)
-				?\s)))))))
-	       ;; ... LaTeX environments and fragments...
-	       ((latex-environment latex-fragment)
-		(and (eq (plist-get info :with-latex) 'verbatim)
-		     (list (org-export-expand datum nil))))
-	       ;; ... sub/superscripts...
-	       ((subscript superscript)
-		(let ((sub/super-p (plist-get info :with-sub-superscript))
-		      (bracketp (org-element-property :use-brackets-p datum)))
-		  (and (or (not sub/super-p)
-			   (and (eq sub/super-p '{}) (not bracketp)))
-		       (append
-			(list (concat
-			       (if (eq (org-element-type datum) 'subscript)
-				   "_"
-				 "^")
-			       (and bracketp "{")))
-			(org-element-contents datum)
-			(list (concat
-			       (and bracketp "}")
-			       (and (org-element-property :post-blank datum)
-				    (make-string
-				     (org-element-property :post-blank datum)
-				     ?\s)))))))))))
+      (let* ((type (org-element-type datum))
+	     (post-blank
+	      (pcase (org-element-property :post-blank datum)
+		(`nil nil)
+		(n (make-string n (if (eq type 'latex-environment) ?\n ?\s)))))
+	     (new
+	      (cl-case type
+		;; ... entities...
+		(entity
+		 (and (not (plist-get info :with-entities))
+		      (list (concat (org-export-expand datum nil)
+				    post-blank))))
+		;; ... emphasis...
+		((bold italic strike-through underline)
+		 (and (not (plist-get info :with-emphasize))
+		      (let ((marker (cl-case type
+				      (bold "*")
+				      (italic "/")
+				      (strike-through "+")
+				      (underline "_"))))
+			(append
+			 (list marker)
+			 (org-element-contents datum)
+			 (list (concat marker post-blank))))))
+		;; ... LaTeX environments and fragments...
+		((latex-environment latex-fragment)
+		 (and (eq (plist-get info :with-latex) 'verbatim)
+		      (list (concat (org-export-expand datum nil)
+				    post-blank))))
+		;; ... sub/superscripts...
+		((subscript superscript)
+		 (let ((sub/super-p (plist-get info :with-sub-superscript))
+		       (bracketp (org-element-property :use-brackets-p datum)))
+		   (and (or (not sub/super-p)
+			    (and (eq sub/super-p '{}) (not bracketp)))
+			(append
+			 (list (concat (if (eq type 'subscript) "_" "^")
+				       (and bracketp "{")))
+			 (org-element-contents datum)
+			 (list (concat (and bracketp "}")
+				       post-blank)))))))))
 	(when new
 	  ;; Splice NEW at DATUM location in parse tree.
 	  (dolist (e new (org-element-extract-element datum))
@@ -3279,6 +3271,11 @@ storing and resolving footnotes.  It is created automatically."
 	    (let* ((value (org-element-property :value element))
 		   (ind (current-indentation))
 		   location
+		   (coding-system-for-read
+		    (or (and (string-match ":coding +\\(\\S-+\\)>" value)
+			     (prog1 (intern (match-string 1 value))
+			       (setq value (replace-match "" nil nil value))))
+			coding-system-for-read))
 		   (file
 		    (and (string-match "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)"
 				       value)
@@ -3526,8 +3523,8 @@ is to happen."
 	  (goto-char (point-min))
 	  (unless (eq major-mode 'org-mode)
 	    (let ((org-inhibit-startup t)) (org-mode)))	;set regexps
-	  (let ((regexp (concat org-plain-link-re "\\|" org-angle-link-re)))
-	    (while (re-search-forward org-any-link-re nil t)
+	  (let ((regexp (concat org-link-plain-re "\\|" org-link-angle-re)))
+	    (while (re-search-forward org-link-any-re nil t)
 	      (let ((link (save-excursion
 			    (forward-char -1)
 			    (save-match-data (org-element-context)))))
@@ -3710,18 +3707,24 @@ will become the empty string."
 		(cdr (nreverse (cons (funcall prepare-value s) result))))))))
     (if property (plist-get attributes property) attributes)))
 
-(defun org-export-get-caption (element &optional shortp)
+(defun org-export-get-caption (element &optional short)
   "Return caption from ELEMENT as a secondary string.
 
-When optional argument SHORTP is non-nil, return short caption,
-as a secondary string, instead.
+When optional argument SHORT is non-nil, return short caption, as
+a secondary string, instead.
 
 Caption lines are separated by a white space."
-  (let ((full-caption (org-element-property :caption element)) caption)
-    (dolist (line full-caption (cdr caption))
-      (let ((cap (funcall (if shortp 'cdr 'car) line)))
-	(when cap
-	  (setq caption (nconc (list " ") (copy-sequence cap) caption)))))))
+  (let ((full-caption (org-element-property :caption element))
+	(get (if short #'cdr #'car))
+	caption)
+    (dolist (line full-caption)
+      (pcase (funcall get line)
+	(`nil nil)
+	(c
+	 (setq caption
+	       (nconc (list " ")
+		      (copy-sequence c) caption)))))
+    (cdr caption)))
 
 
 ;;;; For Derived Back-ends
@@ -4165,6 +4168,9 @@ meant to be translated with `org-export-data' or alike."
 ;; specified id or custom-id in parse tree, the path to the external
 ;; file with the id.
 ;;
+;; `org-export-resolve-link' searches for the destination of a link
+;; within the parsed tree and returns the element.
+;;
 ;; `org-export-resolve-coderef' associates a reference to a line
 ;; number in the element it belongs, or returns the reference itself
 ;; when the element isn't numbered.
@@ -4252,8 +4258,8 @@ structure of RULES.
 
 Return modified DATA."
   (let ((link-re (format "\\`\\(?:%s\\|%s\\)\\'"
-			 org-plain-link-re
-			 org-angle-link-re))
+			 org-link-plain-re
+			 org-link-angle-re))
 	(case-fold-search t))
     (org-element-map data 'link
       (lambda (l)
@@ -4359,7 +4365,7 @@ as returned by `org-export-search-cells'."
   (let ((targets (org-export-search-cells datum)))
     (and targets (cl-some (lambda (cell) (member cell targets)) cells))))
 
-(defun org-export-resolve-fuzzy-link (link info)
+(defun org-export-resolve-fuzzy-link (link info &rest pseudo-types)
   "Return LINK destination.
 
 INFO is a plist holding contextual information.
@@ -4376,6 +4382,10 @@ Return value can be an object or an element:
 
 - Otherwise, throw an error.
 
+PSEUDO-TYPES are pseudo-elements types, i.e., elements defined
+specifically in an export back-end, that could have a name
+affiliated keyword.
+
 Assume LINK type is \"fuzzy\".  White spaces are not
 significant."
   (let* ((search-cells (org-export-string-to-search-cell
@@ -4388,7 +4398,7 @@ significant."
     (if (not (eq cached 'not-found)) cached
       (let ((matches
 	     (org-element-map (plist-get info :parse-tree)
-		 (cons 'target org-element-all-elements)
+		 (append pseudo-types '(target) org-element-all-elements)
 	       (lambda (datum)
 		 (and (org-export-match-search-cell-p datum search-cells)
 		      datum)))))
@@ -4446,6 +4456,31 @@ has type \"radio\"."
 		 t)
 	     radio))
       info 'first-match)))
+
+(defun org-export-resolve-link (link info)
+  "Return LINK destination.
+
+LINK is a string or a link object.
+
+INFO is a plist holding contextual information.
+
+Return value can be an object or an element:
+
+- If LINK path matches an ID or a custom ID, return the headline.
+
+- If LINK path matches a fuzzy link, return its destination.
+
+- Otherwise, throw an error."
+  ;; Convert string links to link objects.
+  (when (stringp link)
+    (setq link (with-temp-buffer
+		 (save-excursion
+		   (insert (org-link-make-string link)))
+		 (org-element-link-parser))))
+  (pcase (org-element-property :type link)
+    ((or "custom-id" "id") (org-export-resolve-id-link link info))
+    ("fuzzy" (org-export-resolve-fuzzy-link link info))
+    (_ (signal 'org-link-broken (list (org-element-property :path link))))))
 
 (defun org-export-file-uri (filename)
   "Return file URI associated to FILENAME."
@@ -4766,7 +4801,7 @@ code."
 
 ;;;; For Tables
 ;;
-;; `org-export-table-has-special-column-p' and and
+;; `org-export-table-has-special-column-p' and
 ;; `org-export-table-row-is-special-p' are predicates used to look for
 ;; meta-information about the table structure.
 ;;
@@ -4916,26 +4951,32 @@ same column as TABLE-CELL, or nil."
 		      (plist-put info :table-cell-width-cache table)
 		      table)))
 	 (width-vector (or (gethash table cache)
-			   (puthash table (make-vector columns 'empty) cache)))
-	 (value (aref width-vector column)))
-    (if (not (eq value 'empty)) value
-      (let (cookie-width)
-	(dolist (row (org-element-contents table)
-		     (aset width-vector column cookie-width))
-	  (when (org-export-table-row-is-special-p row info)
-	    ;; In a special row, try to find a width cookie at COLUMN.
-	    (let* ((value (org-element-contents
-			   (elt (org-element-contents row) column)))
-		   (cookie (car value)))
-	      ;; The following checks avoid expanding unnecessarily
-	      ;; the cell with `org-export-data'.
-	      (when (and value
-			 (not (cdr value))
-			 (stringp cookie)
-			 (string-match "\\`<[lrc]?\\([0-9]+\\)?>\\'" cookie)
-			 (match-string 1 cookie))
-		(setq cookie-width
-		      (string-to-number (match-string 1 cookie)))))))))))
+			   (puthash table (make-vector columns 'empty) cache))))
+    ;; Table rows may not have the same number of cells.  Extend
+    ;; WIDTH-VECTOR appropriately if we encounter a row larger than
+    ;; expected.
+    (when (>= column (length width-vector))
+      (setq width-vector
+	    (vconcat width-vector
+		     (make-list (- (1+ column) (length width-vector))
+				'empty)))
+      (puthash table width-vector cache))
+    (pcase (aref width-vector column)
+      (`empty
+       (catch 'found
+	 (dolist (row (org-element-contents table))
+	   (when (org-export-table-row-is-special-p row info)
+	     ;; In a special row, try to find a width cookie at
+	     ;; COLUMN.  The following checks avoid expanding
+	     ;; unnecessarily the cell with `org-export-data'.
+	     (pcase (org-element-contents
+		     (elt (org-element-contents row) column))
+	       (`(,(and (pred stringp) cookie))
+		(when (string-match "\\`<[lrc]?\\([0-9]+\\)>\\'" cookie)
+		  (let ((w (string-to-number (match-string 1 cookie))))
+		    (throw 'found (aset width-vector column w))))))))
+	 (aset width-vector column nil)))
+      (value value))))
 
 (defun org-export-table-cell-alignment (table-cell info)
   "Return TABLE-CELL contents alignment.
@@ -4960,6 +5001,15 @@ Possible values are `left', `right' and `center'."
 		      table)))
 	 (align-vector (or (gethash table cache)
 			   (puthash table (make-vector columns nil) cache))))
+    ;; Table rows may not have the same number of cells.  Extend
+    ;; ALIGN-VECTOR appropriately if we encounter a row larger than
+    ;; expected.
+    (when (>= column (length align-vector))
+      (setq align-vector
+	    (vconcat align-vector
+		     (make-list (- (1+ column) (length align-vector))
+				nil)))
+      (puthash table align-vector cache))
     (or (aref align-vector column)
 	(let ((number-cells 0)
 	      (total-cells 0)

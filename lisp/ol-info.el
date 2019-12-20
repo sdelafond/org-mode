@@ -1,4 +1,4 @@
-;;; org-info.el --- Support for Links to Info Nodes -*- lexical-binding: t; -*-
+;;; ol-info.el --- Links to Info Nodes               -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2019 Free Software Foundation, Inc.
 
@@ -30,7 +30,7 @@
 
 ;;; Code:
 
-(require 'org)
+(require 'ol)
 
 ;; Declare external functions and variables
 
@@ -54,7 +54,7 @@
 			"#" Info-current-node))
 	  (desc (concat (file-name-nondirectory Info-current-file)
 			"#" Info-current-node)))
-      (org-store-link-props :type "info" :file Info-current-file
+      (org-link-store-props :type "info" :file Info-current-file
 			    :node Info-current-node
 			    :link link :desc desc)
       link)))
@@ -143,6 +143,6 @@ See `org-link-parameters' for details about PATH, DESC and FORMAT."
 	 (format "@ref{%s,%s,,%s,}" node title manual)))
       (_ nil))))
 
-(provide 'org-info)
+(provide 'ol-info)
 
-;;; org-info.el ends here
+;;; ol-info.el ends here

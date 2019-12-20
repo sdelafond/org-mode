@@ -131,10 +131,6 @@ Files: testing/lisp/test-org-agenda.el
 Copyright: 2017 Marco Wahl
 License: GPL-3+
 
-Files: testing/lisp/test-org-attach-annex.el
-Copyright: 2016 Erik Hetzner
-License: GPL-3+
-
 Files: testing/lisp/test-org-capture.el
 Copyright: 2015, 2017  Nicolas Goaziou
 License: GPL-3+

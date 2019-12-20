@@ -1,3 +1,12 @@
+org-mode (9.3+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 9.3+dfsg
+  * Bump up Standards-Version
+  * Rename debian/NEWS.debian to debian/NEWS
+  * Clean up debian/copyright
+
+ -- Sebastien Delafond <seb@debian.org>  Fri, 20 Dec 2019 15:47:16 +0100
+
 org-mode (9.2.3+dfsg-1) unstable; urgency=medium
 
   * New upstream version 9.2.3+dfsg

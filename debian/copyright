@@ -7,6 +7,14 @@ Files: *
 Copyright: 2004-2017 Free Software Foundation, Inc.
 License: GPL-3+
 
+Files: ol-git-link.el
+Copyright: 2009-2014 Reimar Finken <reimar.finken@gmx.de>
+License: GPL-3+
+
+Files: ol-notmuch.el
+Copyright: 2010-2014 Matthieu Lemerre <racin@free.fr>
+License: GPL-2+
+
 Files: contrib/lisp/org-annotate-file.el
 Copyright: 2008-2014 Philip Jackson <phil@shellarchive.co.uk>
 License: GPL-2+

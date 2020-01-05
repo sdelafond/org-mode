@@ -9,6 +9,10 @@ org-mode (9.3+dfsg-2) UNRELEASED; urgency=medium
     update their configuration due to the renamed libraries noted above.
   * Update debian/copyright to add missing info for ol-git-link.el and
     ol-notmuch.el
+  * Drop contrib/lisp/org-drill.el from dh-elpa installed files.  See
+    #947017 for the RFP bug for org-drill.  Ideally it should be packaged
+    and this Debian revision of org-mode should either depend or recommend
+    elpa-org-drill.
 
  -- Nicholas D Steeves <nsteeves@gmail.com>  Sat, 04 Jan 2020 15:10:15 -0700
 

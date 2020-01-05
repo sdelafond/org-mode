@@ -31,7 +31,6 @@ contrib/lisp/org-collector.el
 contrib/lisp/org-contacts.el
 contrib/lisp/org-contribdir.el
 contrib/lisp/org-depend.el
-contrib/lisp/org-drill.el
 contrib/lisp/org-effectiveness.el
 contrib/lisp/org-eldoc.el
 contrib/lisp/org-eval-light.el

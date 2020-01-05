@@ -1,4 +1,4 @@
-org-mode (9.3+dfsg-2) UNRELEASED; urgency=medium
+org-mode (9.3+dfsg-2) unstable; urgency=medium
 
     With the 9.3 release, upstream Org-mode renamed a number of libraries.
     The "org-" prefix for these files was changed to "ol-", and the

@@ -2,12 +2,11 @@ org-mode (9.3+dfsg-2) UNRELEASED; urgency=medium
 
   * Restore the functionality provided by org-notmuch (Closes: #948027)
   * Install ol-bookmark.el, ol-elisp-symbol.el, ol-git-link.el, ol-man.el,
-    ol-mew.el, ol-notmuch.el, ol-vm.el, ol-wl.el using debian/elpa.  In
-    addition to renaming these files to use an "ol-" prefix rather than an
-    "org-" prefix, upstream org-mode also renamed all package/library
-    names.  Users of these packages must update their Emacs configuration
-    to "(require 'ol-foo)" wherever "(require 'org-foo)" was previously
-    used.
+    ol-mew.el, ol-notmuch.el, ol-vm.el, ol-wl.el using debian/elpa.  All
+    of these files previously had an "org-" prefix where they now have
+    "ol-".
+  * Add an entry to debian/NEWS to notify users of the requirement to
+    update their configuration due to the renamed libraries noted above.
   * Update debian/copyright to add missing info for ol-git-link.el and
     ol-notmuch.el
 

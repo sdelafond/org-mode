@@ -1,3 +1,9 @@
+org-mode (9.3.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 9.3.1+dfsg
+
+ -- Sebastien Delafond <seb@debian.org>  Thu, 16 Jan 2020 09:07:04 +0100
+
 org-mode (9.3+dfsg-2) unstable; urgency=medium
 
   [ Nicholas D Steeves ]

@@ -54,7 +54,7 @@
 ;;;### (autoloads nil "ob-clojure" "ob-clojure.el" (0 0 0 0))
 ;;; Generated autoloads from ob-clojure.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ob-clojure" '("org-babel-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ob-clojure" '("ob-clojure-" "org-babel-")))
 
 ;;;***
 
@@ -655,11 +655,12 @@ see.
 Extract the bodies of source code blocks in FILE.
 Source code blocks are extracted with `org-babel-tangle'.
 Optional argument TARGET-FILE can be used to specify a default
-export file for all source blocks.  Optional argument LANG can be
-used to limit the exported source code blocks by language.
-Return a list whose CAR is the tangled file name.
+export file for all source blocks.  Optional argument LANG-RE can
+be used to limit the exported source code blocks by languages
+matching a regular expression.  Return a list whose CAR is the
+tangled file name.
 
-\(fn FILE &optional TARGET-FILE LANG)" t nil)
+\(fn FILE &optional TARGET-FILE LANG-RE)" t nil)
 
 (autoload 'org-babel-tangle "ob-tangle" "\
 Write code blocks to source-specific files.
@@ -669,10 +670,11 @@ With one universal prefix argument, only tangle the block at point.
 When two universal prefix arguments, only tangle blocks for the
 tangle file of the block at point.
 Optional argument TARGET-FILE can be used to specify a default
-export file for all source blocks.  Optional argument LANG can be
-used to limit the exported source code blocks by language.
+export file for all source blocks.  Optional argument LANG-RE can
+be used to limit the exported source code blocks by languages
+matching a regular expression.
 
-\(fn &optional ARG TARGET-FILE LANG)" t nil)
+\(fn &optional ARG TARGET-FILE LANG-RE)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ob-tangle" '("org-babel-")))
 
@@ -682,6 +684,207 @@ used to limit the exported source code blocks by language.
 ;;; Generated autoloads from ob-vala.el
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ob-vala" '("org-babel-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-bbdb" "ol-bbdb.el" (0 0 0 0))
+;;; Generated autoloads from ol-bbdb.el
+
+(autoload 'org-bbdb-anniversaries "ol-bbdb" "\
+Extract anniversaries from BBDB for display in the agenda.
+When called programmatically, this function expects the `date'
+variable to be globally bound.
+
+\(fn)" nil nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-bbdb" '("org-bbdb-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-bibtex" "ol-bibtex.el" (0 0 0 0))
+;;; Generated autoloads from ol-bibtex.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-bibtex" '("org-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-docview" "ol-docview.el" (0 0 0 0))
+;;; Generated autoloads from ol-docview.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-docview" '("org-docview-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-eshell" "ol-eshell.el" (0 0 0 0))
+;;; Generated autoloads from ol-eshell.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-eshell" '("org-eshell-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-eww" "ol-eww.el" (0 0 0 0))
+;;; Generated autoloads from ol-eww.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-eww" '("org-eww-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-gnus" "ol-gnus.el" (0 0 0 0))
+;;; Generated autoloads from ol-gnus.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-gnus" '("org-gnus-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-info" "ol-info.el" (0 0 0 0))
+;;; Generated autoloads from ol-info.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-info" '("org-info-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-irc" "ol-irc.el" (0 0 0 0))
+;;; Generated autoloads from ol-irc.el
+
+(autoload 'org-irc-store-link "ol-irc" "\
+Dispatch to the appropriate function to store a link to an IRC session.
+
+\(fn)" nil nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-irc" '("org-irc-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-mhe" "ol-mhe.el" (0 0 0 0))
+;;; Generated autoloads from ol-mhe.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-mhe" '("org-mhe-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-rmail" "ol-rmail.el" (0 0 0 0))
+;;; Generated autoloads from ol-rmail.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-rmail" '("org-rmail-")))
+
+;;;***
+
+;;;### (autoloads nil "ol-w3m" "ol-w3m.el" (0 0 0 0))
+;;; Generated autoloads from ol-w3m.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol-w3m" '("org-w3m-")))
+
+;;;***
+
+;;;### (autoloads nil "ol" "ol.el" (0 0 0 0))
+;;; Generated autoloads from ol.el
+
+(autoload 'org-next-link "ol" "\
+Move forward to the next link.
+If the link is in hidden text, expose it.  When SEARCH-BACKWARD
+is non-nil, move backward.
+
+\(fn &optional SEARCH-BACKWARD)" t nil)
+
+(autoload 'org-previous-link "ol" "\
+Move backward to the previous link.
+If the link is in hidden text, expose it.
+
+\(fn)" t nil)
+
+(autoload 'org-toggle-link-display "ol" "\
+Toggle the literal or descriptive display of links.
+
+\(fn)" t nil)
+
+(autoload 'org-store-link "ol" "\
+Store a link to the current location.
+\\<org-mode-map>
+This link is added to `org-stored-links' and can later be inserted
+into an Org buffer with `org-insert-link' (`\\[org-insert-link]').
+
+For some link types, a `\\[universal-argument]' prefix ARG is interpreted.  A single
+`\\[universal-argument]' negates `org-context-in-file-links' for file links or
+`org-gnus-prefer-web-links' for links to Usenet articles.
+
+A `\\[universal-argument] \\[universal-argument]' prefix ARG forces skipping storing functions that are not
+part of Org core.
+
+A `\\[universal-argument] \\[universal-argument] \\[universal-argument]' prefix ARG forces storing a link for each line in the
+active region.
+
+Assume the function is called interactively if INTERACTIVE? is
+non-nil.
+
+\(fn ARG &optional INTERACTIVE\\=\\?)" t nil)
+
+(autoload 'org-insert-link "ol" "\
+Insert a link.  At the prompt, enter the link.
+
+Completion can be used to insert any of the link protocol prefixes in use.
+
+The history can be used to select a link previously stored with
+`org-store-link'.  When the empty string is entered (i.e. if you just
+press `RET' at the prompt), the link defaults to the most recently
+stored link.  As `SPC' triggers completion in the minibuffer, you need to
+use `M-SPC' or `C-q SPC' to force the insertion of a space character.
+
+You will also be prompted for a description, and if one is given, it will
+be displayed in the buffer instead of the link.
+
+If there is already a link at point, this command will allow you to edit
+link and description parts.
+
+With a `\\[universal-argument]' prefix, prompts for a file to link to.  The file name can be
+selected using completion.  The path to the file will be relative to the
+current directory if the file is in the current directory or a subdirectory.
+Otherwise, the link will be the absolute path as completed in the minibuffer
+\(i.e. normally ~/path/to/file).  You can configure this behavior using the
+option `org-link-file-path-type'.
+
+With a `\\[universal-argument] \\[universal-argument]' prefix, enforce an absolute path even if the file is in
+the current directory or below.
+
+A `\\[universal-argument] \\[universal-argument] \\[universal-argument]' prefix negates `org-link-keep-stored-after-insertion'.
+
+If the LINK-LOCATION parameter is non-nil, this value will be used as
+the link location instead of reading one interactively.
+
+If the DESCRIPTION parameter is non-nil, this value will be used as the
+default description.  Otherwise, if `org-link-make-description-function'
+is non-nil, this function will be called with the link target, and the
+result will be the default link description.  When called non-interactively,
+don't allow to edit the default description.
+
+\(fn &optional COMPLETE-FILE LINK-LOCATION DESCRIPTION)" t nil)
+
+(autoload 'org-insert-all-links "ol" "\
+Insert all links in `org-stored-links'.
+When a universal prefix, do not delete the links from `org-stored-links'.
+When `ARG' is a number, insert the last N link(s).
+`PRE' and `POST' are optional arguments to define a string to
+prepend or to append.
+
+\(fn ARG &optional PRE POST)" t nil)
+
+(autoload 'org-insert-last-stored-link "ol" "\
+Insert the last link stored in `org-stored-links'.
+
+\(fn ARG)" t nil)
+
+(autoload 'org-insert-link-global "ol" "\
+Insert a link like Org mode does.
+This command can be called in any mode to insert a link in Org syntax.
+
+\(fn)" t nil)
+
+(autoload 'org-update-radio-target-regexp "ol" "\
+Find all radio targets in this file and update the regular expression.
+Also refresh fontification if needed.
+
+\(fn)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ol" '("org-")))
 
 ;;;***
 
@@ -1130,6 +1333,11 @@ the default behavior.
 
 \(fn &optional SELECT START-TIME)" t nil)
 
+(autoload 'org-clock-toggle-auto-clockout "org-clock" "\
+
+
+\(fn)" t nil)
+
 (autoload 'org-clock-in-last "org-clock" "\
 Clock in the last closed clocked item.
 When already clocking in, send a warning.
@@ -1231,6 +1439,8 @@ When called with a prefix argument, move to the first clock table
 in the buffer and update it.
 
 \(fn &optional ARG)" t nil)
+
+(eval-after-load 'org '(progn (org-dynamic-block-define "clocktable" #'org-clock-report)))
 
 (autoload 'org-clocktable-shift "org-clock" "\
 Try to shift the :block date of the clocktable at point.
@@ -1350,6 +1560,8 @@ Create a dynamic block capturing a column view table.
 
 \(fn)" t nil)
 
+(eval-after-load 'org '(progn (org-dynamic-block-define "columnview" #'org-columns-insert-dblock)))
+
 (autoload 'org-agenda-columns "org-colview" "\
 Turn on or update column view in the agenda.
 
@@ -1374,6 +1586,31 @@ Try very hard to provide sensible version strings.
 ;;;### (autoloads nil "org-crypt" "org-crypt.el" (0 0 0 0))
 ;;; Generated autoloads from org-crypt.el
 
+(autoload 'org-encrypt-entry "org-crypt" "\
+Encrypt the content of the current headline.
+
+\(fn)" t nil)
+
+(autoload 'org-decrypt-entry "org-crypt" "\
+Decrypt the content of the current headline.
+
+\(fn)" t nil)
+
+(autoload 'org-encrypt-entries "org-crypt" "\
+Encrypt all top-level entries in the current buffer.
+
+\(fn)" t nil)
+
+(autoload 'org-decrypt-entries "org-crypt" "\
+Decrypt all entries in the current buffer.
+
+\(fn)" t nil)
+
+(autoload 'org-crypt-use-before-save-magic "org-crypt" "\
+Add a hook to automatically encrypt entries before a file is saved to disk.
+
+\(fn)" nil nil)
+
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-crypt" '("org-")))
 
 ;;;***
@@ -1389,7 +1626,18 @@ Try very hard to provide sensible version strings.
 ;;; Generated autoloads from org-datetree.el
 
 (autoload 'org-datetree-find-date-create "org-datetree" "\
-Find or create an entry for date D.
+Find or create a day entry for date D.
+If KEEP-RESTRICTION is non-nil, do not widen the buffer.
+When it is nil, the buffer will be widened to make sure an existing date
+tree can be found.  If it is the symbol `subtree-at-point', then the tree
+will be built under the headline at point.
+
+\(fn D &optional KEEP-RESTRICTION)" nil nil)
+
+(autoload 'org-datetree-find-month-create "org-datetree" "\
+Find or create a month entry for date D.
+Compared to `org-datetree-find-date-create' this function creates
+entries grouped by month instead of days.
 If KEEP-RESTRICTION is non-nil, do not widen the buffer.
 When it is nil, the buffer will be widened to make sure an existing date
 tree can be found.  If it is the symbol `subtree-at-point', then the tree
@@ -1503,7 +1751,7 @@ element.
 
 Possible types are defined in `org-element-all-elements'.
 Properties depend on element or object type, but always include
-`:begin', `:end', `:parent' and `:post-blank' properties.
+`:begin', `:end', and `:post-blank' properties.
 
 As a special case, if point is at the very beginning of the first
 item in a list or sub-list, returned element will be that list
@@ -1764,7 +2012,7 @@ during idle time.
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-indent" '("org-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-indent" '("org-indent-")))
 
 ;;;***
 
@@ -1808,6 +2056,16 @@ ARG can also be a list of checker names, as symbols, to run.
 
 ;;;### (autoloads nil "org-list" "org-list.el" (0 0 0 0))
 ;;; Generated autoloads from org-list.el
+
+(autoload 'org-list-checkbox-radio-mode "org-list" "\
+When turned on, use list checkboxes as radio buttons.
+
+If called interactively, enable Org-List-Checkbox-Radio mode if ARG is positive, and
+disable it if ARG is zero or negative.  If called from Lisp,
+also enable the mode if ARG is omitted or nil, and toggle it
+if ARG is `toggle'; disable the mode otherwise.
+
+\(fn &optional ARG)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-list" '("org-")))
 
@@ -1911,6 +2169,59 @@ line directly before or after the table.
 
 ;;;***
 
+;;;### (autoloads nil "org-refile" "org-refile.el" (0 0 0 0))
+;;; Generated autoloads from org-refile.el
+
+(autoload 'org-refile-copy "org-refile" "\
+Like `org-refile', but preserve the refiled subtree.
+
+\(fn)" t nil)
+
+(autoload 'org-refile "org-refile" "\
+Move the entry or entries at point to another heading.
+
+The list of target headings is compiled using the information in
+`org-refile-targets', which see.
+
+At the target location, the entry is filed as a subitem of the
+target heading.  Depending on `org-reverse-note-order', the new
+subitem will either be the first or the last subitem.
+
+If there is an active region, all entries in that region will be
+refiled.  However, the region must fulfill the requirement that
+the first heading sets the top-level of the moved text.
+
+With a `\\[universal-argument]' ARG, the command will only visit the target location
+and not actually move anything.
+
+With a prefix `\\[universal-argument] \\[universal-argument]', go to the location where the last
+refiling operation has put the subtree.
+
+With a numeric prefix argument of `2', refile to the running clock.
+
+With a numeric prefix argument of `3', emulate `org-refile-keep'
+being set to t and copy to the target location, don't move it.
+Beware that keeping refiled entries may result in duplicated ID
+properties.
+
+RFLOC can be a refile location obtained in a different way.
+
+MSG is a string to replace \"Refile\" in the default prompt with
+another verb.  E.g. `org-copy' sets this parameter to \"Copy\".
+
+See also `org-refile-use-outline-path'.
+
+If you are using target caching (see `org-refile-use-cache'), you
+have to clear the target cache in order to find new targets.
+This can be done with a `0' prefix (`C-0 C-c C-w') or a triple
+prefix argument (`C-u C-u C-u C-c C-w').
+
+\(fn &optional ARG DEFAULT-BUFFER RFLOC MSG)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-refile" '("org-")))
+
+;;;***
+
 ;;;### (autoloads nil "org-src" "org-src.el" (0 0 0 0))
 ;;; Generated autoloads from org-src.el
 
@@ -1920,6 +2231,16 @@ line directly before or after the table.
 
 ;;;### (autoloads nil "org-table" "org-table.el" (0 0 0 0))
 ;;; Generated autoloads from org-table.el
+
+(autoload 'org-table-header-line-mode "org-table" "\
+Display the first row of the table at point in the header line.
+
+If called interactively, enable Org-Table-Header-Line mode if ARG is positive, and
+disable it if ARG is zero or negative.  If called from Lisp,
+also enable the mode if ARG is omitted or nil, and toggle it
+if ARG is `toggle'; disable the mode otherwise.
+
+\(fn &optional ARG)" t nil)
 
 (autoload 'org-table-create-with-table\.el "org-table" "\
 Use the table.el package to insert a new table.
@@ -1972,18 +2293,18 @@ Import FILE as a table.
 The command tries to be smart and figure out the separator in the
 following way:
 
-  - when each line contains a TAB, assume TAB-separated material
-  - when each line contains a comma, assume CSV material
-  - else, assume one or more SPACE characters as separator.
+- when each line contains a TAB, assume TAB-separated material;
+- when each line contains a comma, assume CSV material;
+- else, assume one or more SPACE characters as separator.
 
 When non-nil, SEPARATOR specifies the field separator in the
 lines.  It can have the following values:
 
-\(4)     Use the comma as a field separator
-\(16)    Use a TAB as field separator
-\(64)    Prompt for a regular expression as field separator
-integer When a number, use that many spaces, or a TAB, as field separator
-regexp  When a regular expression, use it to match the separator.
+- (4)     Use the comma as a field separator.
+- (16)    Use a TAB as field separator.
+- (64)    Prompt for a regular expression as field separator.
+- integer When a number, use that many spaces, or a TAB, as field separator.
+- regexp  When a regular expression, use it to match the separator.
 
 \(fn FILE SEPARATOR)" t nil)
 
@@ -2493,6 +2814,7 @@ Regular expression matching exponentials as produced by calc.")
 
 (autoload 'org-table-to-lisp "org-table" "\
 Convert the table at point to a Lisp structure.
+
 The structure will be a list.  Each item is either the symbol `hline'
 for a horizontal separator line, or a list of field values as strings.
 The table is taken from the parameter TXT, or from the buffer at point.
@@ -2896,10 +3218,10 @@ When point is not at the beginning of a headline, execute the global
 binding for `TAB', which is re-indenting the line.  See the option
 `org-cycle-emulate-tab' for details.
 
-As a special case, if point is at the beginning of the buffer and there is
-no headline in line 1, this function will act as if called with prefix arg
-\(`\\[universal-argument] TAB', same as `S-TAB') also when called without prefix arg, but only
-if the variable `org-cycle-global-at-bob' is t.
+As a special case, if point is at the very beginning of the buffer, if
+there is no headline there, and if the variable `org-cycle-global-at-bob'
+is non-nil, this function acts as if called with prefix argument (`\\[universal-argument] TAB',
+same as `S-TAB') also when called without prefix argument.
 
 \(fn &optional ARG)" t nil)
 

@@ -280,7 +280,12 @@ num:2 <:active")))
   (should-not
    (equal "Mine"
 	  (org-test-with-parsed-data "* COMMENT H1\n** H2\n#+EMAIL: Mine"
-				     (plist-get info :email)))))
+				     (plist-get info :email))))
+  ;; Keywords can be set to an empty value.
+  (should-not
+   (let ((user-full-name "Me"))
+     (org-test-with-parsed-data "#+AUTHOR:"
+				(plist-get info :author)))))
 
 (ert-deftest test-org-export/get-subtree-options ()
   "Test setting options from headline's properties."
@@ -1426,6 +1431,28 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	   (includee (expand-file-name "includee.org" subdir))
 	   (includer (make-temp-file "org-includer-")))
       (write-region "[[file:foo.org]]" nil includee)
+      (write-region (format "#+INCLUDE: %S"
+			    (file-relative-name includee
+						temporary-file-directory))
+		    nil includer)
+      (let ((buffer (find-file-noselect includer t)))
+	(unwind-protect
+	    (with-current-buffer buffer
+	      (org-export-expand-include-keyword)
+	      (org-trim (buffer-string)))
+	  (when (buffer-live-p buffer)
+	    (with-current-buffer buffer (set-buffer-modified-p nil))
+	    (kill-buffer buffer))
+	  (when (file-exists-p subdir) (delete-directory subdir t))
+	  (when (file-exists-p includer) (delete-file includer)))))))
+  ;; Preserve blanks after the link.
+  (should
+   (string-suffix-p
+    "foo.org]] :tag:"
+    (let* ((subdir (make-temp-file "org-includee-" t))
+	   (includee (expand-file-name "includee.org" subdir))
+	   (includer (make-temp-file "org-includer-")))
+      (write-region "[[file:foo.org]] :tag:" nil includee)
       (write-region (format "#+INCLUDE: %S"
 			    (file-relative-name includee
 						temporary-file-directory))
@@ -2949,7 +2976,7 @@ Para2"
    (string-match
     "success"
     (progn
-      (org-link-set-parameters "foo" :export (lambda (p d f) "success"))
+      (org-link-set-parameters "foo" :export (lambda (p d f i) "success"))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
@@ -2958,14 +2985,14 @@ Para2"
 	'((section . (lambda (s c i) c))
 	  (paragraph . (lambda (p c i) c))
 	  (link . (lambda (l c i)
-		    (or (org-export-custom-protocol-maybe l c 'test)
+		    (or (org-export-custom-protocol-maybe l c 'test i)
 			"failure")))))))))
   (should-not
    (string-match
     "success"
     (progn
       (org-link-set-parameters
-       "foo" :export (lambda (p d f) (and (eq f 'test) "success")))
+       "foo" :export (lambda (p d f i) (and (eq f 'test) "success")))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
@@ -2974,7 +3001,7 @@ Para2"
 	'((section . (lambda (s c i) c))
 	  (paragraph . (lambda (p c i) c))
 	  (link . (lambda (l c i)
-		    (or (org-export-custom-protocol-maybe l c 'no-test)
+		    (or (org-export-custom-protocol-maybe l c 'no-test i)
 			"failure")))))))))
   ;; Ignore anonymous back-ends.
   (should-not
@@ -2982,7 +3009,7 @@ Para2"
     "success"
     (progn
       (org-link-set-parameters
-       "foo" :export (lambda (p d f) (and (eq f 'test) "success")))
+       "foo" :export (lambda (p d f i) (and (eq f 'test) "success")))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
@@ -2990,7 +3017,7 @@ Para2"
 	'((section . (lambda (s c i) c))
 	  (paragraph . (lambda (p c i) c))
 	  (link . (lambda (l c i)
-		    (or (org-export-custom-protocol-maybe l c nil)
+		    (or (org-export-custom-protocol-maybe l c nil i)
 			"failure"))))))))))
 
 (ert-deftest test-org-export/get-coderef-format ()
@@ -4099,6 +4126,16 @@ Another text. (ref:text)
 | a | b |
 |---+---|
 | c | d |"
+     (org-export-table-has-header-p
+      (org-element-map tree 'table 'identity info 'first-match)
+      info)))
+  ;; With a multi-line header.
+  (should
+   (org-test-with-parsed-data "
+| a | b |
+| 0 | 1 |
+|---+---|
+| a | w |"
      (org-export-table-has-header-p
       (org-element-map tree 'table 'identity info 'first-match)
       info)))

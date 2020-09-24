@@ -1,4 +1,4 @@
-;;; org-notmuch.el --- Links to notmuch messages
+;;; ol-notmuch.el --- Links to notmuch messages
 
 ;; Copyright (C) 2010-2014  Matthieu Lemerre
 
@@ -40,7 +40,6 @@
 ;;; Code:
 
 (require 'ol)
-(require 'org)
 
 ;; customisable notmuch open functions
 (defcustom org-notmuch-open-function
@@ -80,14 +79,14 @@ Should accept a notmuch search string as the sole argument."
 	   (from (notmuch-show-get-from))
 	   (date (org-trim (notmuch-show-get-date)))
 	   desc link)
-      (org-store-link-props :type "notmuch" :from from :to to :date date
+      (org-link-store-props :type "notmuch" :from from :to to :date date
        			    :subject subject :message-id message-id)
-      (setq desc (org-email-link-description))
+      (setq desc (org-link-email-description))
       (setq link (concat "notmuch:id:" message-id))
-      (org-add-link-props :link link :description desc)
+      (org-link-add-props :link link :description desc)
       link)))
 
-(defun org-notmuch-open (path)
+(defun org-notmuch-open (path _)
   "Follow a notmuch message link specified by PATH."
   (funcall org-notmuch-open-function path))
 
@@ -109,12 +108,12 @@ Can link to more than one message, if so all matching messages are shown."
   (when (eq major-mode 'notmuch-search-mode)
     (let ((link (concat "notmuch-search:" notmuch-search-query-string))
 	  (desc (concat "Notmuch search: " notmuch-search-query-string)))
-      (org-store-link-props :type "notmuch-search"
+      (org-link-store-props :type "notmuch-search"
 			    :link link
 			    :description desc)
       link)))
 
-(defun org-notmuch-search-open (path)
+(defun org-notmuch-search-open (path _)
   "Follow a notmuch message link specified by PATH."
   (message "%s" path)
   (org-notmuch-search-follow-link path))
@@ -135,12 +134,12 @@ Can link to more than one message, if so all matching messages are shown."
   (when (eq major-mode 'notmuch-tree-mode)
     (let ((link (concat "notmuch-tree:" (notmuch-tree-get-query)))
 	  (desc (concat "Notmuch tree: " (notmuch-tree-get-query))))
-      (org-store-link-props :type "notmuch-tree"
+      (org-link-store-props :type "notmuch-tree"
 			    :link link
 			    :description desc)
       link)))
 
-(defun org-notmuch-tree-open (path)
+(defun org-notmuch-tree-open (path _)
   "Follow a notmuch message link specified by PATH."
   (message "%s" path)
   (org-notmuch-tree-follow-link path))
